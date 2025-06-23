@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - JobMatch</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">JobMatch</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-light text-primary ms-2" href="#">Sign Up</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Section -->
+    <section class="py-5 bg-light min-vh-100 d-flex align-items-center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5 col-md-7">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white text-center py-4">
+                            <h2 class="mb-2">Welcome Back!</h2>
+                            <p class="mb-0">Sign in to your JobMatch account</p>
+                        </div>
+                        <div class="card-body p-5">
+                            <form>
+                                <!-- Email Input -->
+                                <div class="mb-4">
+                                    <label for="email" class="form-label fw-bold">Email Address</label>
+                                    <input type="email" class="form-control form-control-lg" id="email" placeholder="Enter your email" required>
+                                </div>
+
+                                <!-- Password Input -->
+                                <div class="mb-4">
+                                    <label for="password" class="form-label fw-bold">Password</label>
+                                    <input type="password" class="form-control form-control-lg" id="password" placeholder="Enter your password" required>
+                                </div>
+
+                                <!-- Remember Me & Forgot Password -->
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="rememberMe">
+                                        <label class="form-check-label" for="rememberMe">
+                                            Remember me
+                                        </label>
+                                    </div>
+                                    <a href="#" class="text-primary text-decoration-none">Forgot Password?</a>
+                                </div>
+
+                                <!-- Login Button -->
+                                <div class="d-grid mb-4">
+                                    <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
+                                </div>
+
+                                <!-- Divider -->
+                                <div class="text-center mb-4">
+                                    <div class="d-flex align-items-center">
+                                        <hr class="flex-grow-1">
+                                       
+                                        <hr class="flex-grow-1">
+                                    </div>
+                                </div>
+
+                                
+                            </form>
+                        </div>
+                        <div class="card-footer text-center bg-light py-4">
+                            <p class="mb-0">Don't have an account? <a href="#" class="text-primary fw-bold text-decoration-none">Create Account</a></p>
+                        </div>
+                    </div>
+
+                    <!-- Additional Info -->
+                    <div class="text-center mt-4">
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="text-primary">
+                                    <h5 class="fw-bold">50K+</h5>
+                                    <small class="text-muted">Active Jobs</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-success">
+                                    <h5 class="fw-bold">100K+</h5>
+                                    <small class="text-muted">Happy Users</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-warning">
+                                    <h5 class="fw-bold">24/7</h5>
+                                    <small class="text-muted">Support</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="py-5 bg-white">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h3 class="fw-bold text-primary">Why Choose JobMatch?</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <span style="font-size: 24px;">🎯</span>
+                    </div>
+                    <h5>Smart Matching</h5>
+                    <p class="text-muted">AI-powered job recommendations tailored to your skills and preferences</p>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <span style="font-size: 24px;">⚡</span>
+                    </div>
+                    <h5>Quick Apply</h5>
+                    <p class="text-muted">Apply to multiple jobs with one click using your saved profile</p>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <span style="font-size: 24px;">📊</span>
+                    </div>
+                    <h5>Track Progress</h5>
+                    <p class="text-muted">Monitor your applications and get insights on your job search</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0">JobMatch</h5>
+                    <p class="mb-0 small">Your career, our priority</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 small">&copy; 2025 JobMatch. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
