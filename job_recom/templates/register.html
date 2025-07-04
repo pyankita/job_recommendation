@@ -1,248 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register - JobMatch</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        .navbar {
+            background-color: #6a5094;
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .register-section {
+            padding: 40px 20px;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+        }
+
+        .register-card {
+            background-color: white;
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(15, 14, 14, 0.1);
+        }
+
+        .register-card h2,
+        .register-card p {
+            text-align: center;
+        }
+
+        .register-card h2 {
+            color: #6a5094;
+        }
+
+        .form-section {
+            margin-top: 30px;
+        }
+
+        .form-section h5 {
+            color: #6a5094;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="password"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .checkbox-group {
+            margin-bottom: 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #6a5094;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #4b15a1;
+        }
+
+        .footer {
+            background-color: #222;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+        }
+    </style>
 </head>
+
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">JobMatch</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-outline-light ms-2" href="#">Login</a>
-                    </li>
-                </ul>
-            </div>
+    <div class="navbar">
+        <div><strong>JobMatch</strong></div>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="login.html" class="btn-outline">Login</a>
+            <a href="register.html">Signup</a>
         </div>
-    </nav>
+    </div>
 
-    <!-- Registration Section -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="card shadow">
-                        <div class="card-header bg-primary text-white text-center">
-                            <h2 class="mb-0">Create Your JobMatch Account</h2>
-                            <p class="mb-0">Join thousands of job seekers finding their perfect match</p>
-                        </div>
-                        <div class="card-body p-4">
-                            <form>
-                                <!-- Personal Information -->
-                                <div class="mb-4">
-                                    <h5 class="text-primary mb-3">Personal Information</h5>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="firstName" class="form-label">First Name *</label>
-                                            <input type="text" class="form-control" id="firstName" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="lastName" class="form-label">Last Name *</label>
-                                            <input type="text" class="form-control" id="lastName" required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="email" class="form-label">Email Address *</label>
-                                            <input type="email" class="form-control" id="email" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="phone" class="form-label">Phone Number</label>
-                                            <input type="tel" class="form-control" id="phone">
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="location" class="form-label">Location</label>
-                                        <input type="text" class="form-control" id="location" placeholder="City, State">
-                                    </div>
-                                </div>
+    <div class="register-section">
+        <div class="register-card">
+            <h2>Create Your JobMatch Account</h2>
+            <p>Join thousands of job seekers finding their perfect match</p>
 
-                                <!-- Professional Information -->
-                                <div class="mb-4">
-                                    <h5 class="text-primary mb-3">Professional Information</h5>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="currentJob" class="form-label">Current Job Title</label>
-                                            <input type="text" class="form-control" id="currentJob" placeholder="e.g., Software Developer">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="experience" class="form-label">Years of Experience</label>
-                                            <select class="form-select" id="experience">
-                                                <option value="">Select Experience Level</option>
-                                                <option value="entry">Entry Level (0-2 years)</option>
-                                                <option value="mid">Mid Level (2-5 years)</option>
-                                                <option value="senior">Senior Level (5-10 years)</option>
-                                                <option value="expert">Expert Level (10+ years)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="industry" class="form-label">Industry</label>
-                                        <select class="form-select" id="industry">
-                                            <option value="">Select Industry</option>
-                                            <option value="technology">Technology</option>
-                                            <option value="healthcare">Healthcare</option>
-                                            <option value="finance">Finance</option>
-                                            <option value="education">Education</option>
-                                            <option value="marketing">Marketing</option>
-                                            <option value="engineering">Engineering</option>
-                                            <option value="sales">Sales</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="skills" class="form-label">Skills</label>
-                                        <textarea class="form-control" id="skills" rows="3" placeholder="List your key skills separated by commas (e.g., JavaScript, Python, Project Management)"></textarea>
-                                    </div>
-                                </div>
-
-                                <!-- Job Preferences -->
-                                <div class="mb-4">
-                                    <h5 class="text-primary mb-3">Job Preferences</h5>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="desiredJobTitle" class="form-label">Desired Job Title</label>
-                                            <input type="text" class="form-control" id="desiredJobTitle" placeholder="e.g., Senior Software Engineer">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="salaryRange" class="form-label">Desired Salary Range</label>
-                                            <select class="form-select" id="salaryRange">
-                                                <option value="">Select Salary Range</option>
-                                                <option value="30k-50k">$30,000 - $50,000</option>
-                                                <option value="50k-70k">$50,000 - $70,000</option>
-                                                <option value="70k-100k">$70,000 - $100,000</option>
-                                                <option value="100k-150k">$100,000 - $150,000</option>
-                                                <option value="150k+">$150,000+</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Job Type Preferences</label>
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="full-time" id="fullTime">
-                                                    <label class="form-check-label" for="fullTime">Full-time</label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="part-time" id="partTime">
-                                                    <label class="form-check-label" for="partTime">Part-time</label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="contract" id="contract">
-                                                    <label class="form-check-label" for="contract">Contract</label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="freelance" id="freelance">
-                                                    <label class="form-check-label" for="freelance">Freelance</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Work Arrangement Preferences</label>
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="remote" id="remote">
-                                                    <label class="form-check-label" for="remote">Remote</label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="hybrid" id="hybrid">
-                                                    <label class="form-check-label" for="hybrid">Hybrid</label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="onsite" id="onsite">
-                                                    <label class="form-check-label" for="onsite">On-site</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Account Security -->
-                                <div class="mb-4">
-                                    <h5 class="text-primary mb-3">Account Security</h5>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="password" class="form-label">Password *</label>
-                                            <input type="password" class="form-control" id="password" required>
-                                            <div class="form-text">Minimum 8 characters with letters and numbers</div>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="confirmPassword" class="form-label">Confirm Password *</label>
-                                            <input type="password" class="form-control" id="confirmPassword" required>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Terms and Conditions -->
-                                <div class="mb-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="terms" required>
-                                        <label class="form-check-label" for="terms">
-                                            I agree to the <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a> *
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="newsletter">
-                                        <label class="form-check-label" for="newsletter">
-                                            Subscribe to job alerts and newsletters
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- Submit Button -->
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="card-footer text-center bg-light">
-                            <p class="mb-0">Already have an account? <a href="#" class="text-primary fw-bold">Sign In</a></p>
-                        </div>
+            <form>
+                <div class="form-section">
+                    <h5>Personal Information</h5>
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" />
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" placeholder="City, State" />
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-4">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h5 class="mb-0">JobMatch</h5>
-                    <p class="mb-0 small">Your career, our priority</p>
+                <div class="form-section">
+                    <h5>Account Security</h5>
+                    <div class="form-group">
+                        <label for="password">Password *</label>
+                        <input type="password" id="password" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password *</label>
+                        <input type="password" id="confirmPassword" required />
+                    </div>
                 </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0 small">&copy; 2025 JobMatch. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+                <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 20px;">
+                    <label><input type="checkbox" id="terms" required /> I agree to the Terms of Service and Privacy
+                        Policy *</label>
+                    <label><input type="checkbox" id="newsletter" /> Subscribe to job alerts and newsletters</label>
+                </div>
+
+                <button type="submit" class="submit-btn">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+
 </body>
+
 </html>
