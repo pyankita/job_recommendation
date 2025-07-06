@@ -1,353 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - JobMatch</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #23272f;
+            color: #fff;
+            transition: background 0.3s, color 0.3s;
+        }
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: #23272f;
+            padding: 32px 0 0 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .sidebar h2 {
+            margin-bottom: 32px;
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+        .sidebar ul li {
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        .sidebar ul li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sidebar ul li a .icon {
+            margin-right: 12px;
+            font-size: 1.3em;
+        }
+        .sidebar ul li.active a,
+        .sidebar ul li a:hover {
+            background: #2563eb;
+            color: #fff;
+        }
+        .sidebar ul li.active a .icon,
+        .sidebar ul li a:hover .icon {
+            color: #fff;
+        }
+        .main-content {
+            margin-left: 240px;
+            padding: 32px;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 8px 16px;
+            width: 300px;
+        }
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            width: 100%;
+            outline: none;
+        }
+        .search-bar input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            padding: 32px 0 24px 0;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            transition: box-shadow 0.2s, border 0.2s;
+        }
+        .stat-card .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+        .stat-card .stat-label {
+            font-size: 1.1rem;
+            color: #555;
+        }
+        .stat-blue {
+            border-color: #2196f3;
+        }
+        .stat-blue .stat-number {
+            color: #2196f3;
+        }
+        .stat-green {
+            border-color: #22c55e;
+        }
+        .stat-green .stat-number {
+            color: #15803d;
+        }
+        .stat-orange {
+            border-color: #fbbf24;
+        }
+        .stat-orange .stat-number {
+            color: #f59e0b;
+        }
+        .stat-cyan {
+            border-color: #06b6d4;
+        }
+        .stat-cyan .stat-number {
+            color: #06b6d4;
+        }
+        /* Light/dark mode support */
+        .light-mode {
+            background: #f4f6fa !important;
+            color: #23272f !important;
+        }
+        .light-mode .sidebar {
+            background: #fff !important;
+            color: #23272f !important;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.04);
+        }
+        .light-mode .sidebar ul li a {
+            color: #23272f !important;
+        }
+        .light-mode .sidebar ul li.active a,
+        .light-mode .sidebar ul li a:hover {
+            background: #2563eb !important;
+            color: #fff !important;
+        }
+        .light-mode .main-content {
+            background: #f4f6fa !important;
+            color: #23272f !important;
+        }
+        .light-mode .search-bar {
+            background: rgba(0,0,0,0.05);
+        }
+        .light-mode .search-bar input {
+            color: #23272f;
+        }
+        .light-mode .search-bar input::placeholder {
+            color: rgba(0,0,0,0.5);
+        }
+        .light-mode .stat-card {
+            background: #fff;
+            border: 2px solid #e5e7eb;
+        }
+        .light-mode .stat-card .stat-label {
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#">JobMatch</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                            <div class="bg-light rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
-                                <span class="text-primary fw-bold">JD</span>
-                            </div>
-                            John Doe
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Profile Settings</a></li>
-                            <li><a class="dropdown-item" href="#">Resume Builder</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
+    <div class="sidebar">
+        <h2>Job Portal</h2>
+        <ul>
+            <li class="active">
+                <a href="dashboard.html">
+                    <span class="icon">📊</span>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="browse jobs.html">
+                    <span class="icon">🔍</span>
+                    Browse Jobs
+                </a>
+            </li>
+            <li>
+                <a href="application.html">
+                    <span class="icon">📄</span>
+                    My Applications
+                </a>
+            </li>
+            <li>
+                <a href="saved.html">
+                    <span class="icon">💾</span>
+                    Saved Jobs
+                </a>
+            </li>
+            <li>
+                <a href="profile.html">
+                    <span class="icon">👤</span>
+                    Profile
+                </a>
+            </li>
+            <li>
+                <a href="setting.html">
+                    <span class="icon">⚙️</span>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Dashboard</h1>
+            <div class="search-bar">
+                <input type="text" placeholder="Search jobs...">
             </div>
         </div>
-    </nav>
 
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar p-0">
-                <div class="position-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active fw-bold text-primary" href="#dashboard">
-                                📊 Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" href="#jobs">
-                                🔍 Browse Jobs
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" href="#applications">
-                                📝 My Applications
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" href="#saved">
-                                💾 Saved Jobs
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" href="#profile">
-                                👤 Profile
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" href="#settings">
-                                ⚙️ Settings
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+        <div class="stats-grid">
+            <div class="stat-card stat-blue">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Applications Sent</div>
+            </div>
+            <div class="stat-card stat-green">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Interview Requests</div>
+            </div>
+            <div class="stat-card stat-orange">
+                <div class="stat-number">8</div>
+                <div class="stat-label">Saved Jobs</div>
+            </div>
+            <div class="stat-card stat-cyan">
+                <div class="stat-number">95%</div>
+                <div class="stat-label">Profile Complete</div>
+            </div>
+        </div>
 
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <!-- Header -->
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Welcome back, John!</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-outline-primary">Upload Resume</button>
-                            <button type="button" class="btn btn-primary">Find Jobs</button>
-                        </div>
+        <div class="section jobs-section" style="background: #fff; border-radius: 10px; padding: 24px 18px 18px 18px; margin-bottom: 32px; border: 1px solid #e5e7eb;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 class="section-title" style="font-size: 1.25rem; font-weight: bold; color: #23272f; margin: 0;">Recommended Jobs</h3>
+                <a href="#" class="view-all-btn" style="background: none; border: 1px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 4px 16px; font-size: 1rem; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s;">View All</a>
+            </div>
+            <div class="jobs-row" style="display: flex; gap: 24px; flex-wrap: wrap;">
+                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+                        <span class="match-badge match-green" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #fff; background: #16a34a; display: inline-block;">95% Match</span>
+                    </div>
+                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>Fullstack Developer</strong></div>
+                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">CodeHub Pvt. Ltd. &bull; Kathmandu</div>
+                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Work on modern web and mobile applications using MERN stack and REST APIs.</div>
+                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 120,000 - NPR 180,000</div>
+                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
+                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
                     </div>
                 </div>
-
-                <!-- Stats Cards -->
-                <div class="row mb-4">
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="card border-primary">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-primary">12</h5>
-                                <p class="card-text text-muted mb-0">Applications Sent</p>
-                            </div>
-                        </div>
+                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+                        <span class="match-badge match-yellow" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #23272f; background: #fbbf24; display: inline-block;">88% Match</span>
                     </div>
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="card border-success">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-success">3</h5>
-                                <p class="card-text text-muted mb-0">Interview Requests</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="card border-warning">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-warning">8</h5>
-                                <p class="card-text text-muted mb-0">Saved Jobs</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-3">
-                        <div class="card border-info">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-info">95%</h5>
-                                <p class="card-text text-muted mb-0">Profile Complete</p>
-                            </div>
-                        </div>
+                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>Graphic Designer</strong></div>
+                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">PixelWorks &bull; Lalitpur</div>
+                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Design creative graphics, logos, and UI assets for digital products and marketing.</div>
+                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 60,000 - NPR 100,000</div>
+                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
+                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
                     </div>
                 </div>
-
-                <!-- Quick Actions -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Quick Actions</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row text-center">
-                                    <div class="col-md-3 mb-3">
-                                        <button class="btn btn-outline-primary btn-lg w-100">
-                                            <div class="mb-2">🔍</div>
-                                            Search Jobs
-                                        </button>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <button class="btn btn-outline-success btn-lg w-100">
-                                            <div class="mb-2">📄</div>
-                                            Update Resume
-                                        </button>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <button class="btn btn-outline-warning btn-lg w-100">
-                                            <div class="mb-2">👤</div>
-                                            Edit Profile
-                                        </button>
-                                    </div>
-                                    <div class="col-md-3 mb-3">
-                                        <button class="btn btn-outline-info btn-lg w-100">
-                                            <div class="mb-2">📊</div>
-                                            View Analytics
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+                        <span class="match-badge match-cyan" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #fff; background: #06b6d4; display: inline-block;">91% Match</span>
+                    </div>
+                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>Database Engineer</strong></div>
+                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">DataSecure &bull; Remote</div>
+                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Design, optimize, and maintain large-scale SQL/NoSQL databases for enterprise clients.</div>
+                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 100,000 - NPR 160,000</div>
+                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
+                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
                     </div>
                 </div>
-
-                <!-- Recommended Jobs -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">Recommended Jobs</h5>
-                                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-lg-6 mb-3">
-                                        <div class="card border-0 bg-light">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <h6 class="card-title mb-0">Senior Software Engineer</h6>
-                                                    <span class="badge bg-success">95% Match</span>
-                                                </div>
-                                                <p class="text-muted mb-2">TechCorp Inc. • Remote</p>
-                                                <p class="card-text small mb-3">Join our team building next-generation web applications using React and Node.js.</p>
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <small class="text-muted">$120,000 - $150,000</small>
-                                                    <div>
-                                                        <button class="btn btn-sm btn-outline-primary me-2">Save</button>
-                                                        <button class="btn btn-sm btn-primary">Apply</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6 mb-3">
-                                        <div class="card border-0 bg-light">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                    <h6 class="card-title mb-0">Full Stack Developer</h6>
-                                                    <span class="badge bg-warning">88% Match</span>
-                                                </div>
-                                                <p class="text-muted mb-2">StartupXYZ • Hybrid</p>
-                                                <p class="card-text small mb-3">Work on exciting projects in a fast-paced startup environment.</p>
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <small class="text-muted">$90,000 - $110,000</small>
-                                                    <div>
-                                                        <button class="btn btn-sm btn-outline-primary me-2">Save</button>
-                                                        <button class="btn btn-sm btn-primary">Apply</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+                        <span class="match-badge match-blue" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #fff; background: #2563eb; display: inline-block;">89% Match</span>
+                    </div>
+                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>Android Developer</strong></div>
+                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">Appify Nepal &bull; Pokhara</div>
+                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Develop and maintain Android apps for local and international clients.</div>
+                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 80,000 - NPR 130,000</div>
+                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
+                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
                     </div>
                 </div>
-
-                <!-- Recent Applications -->
-                <div class="row mb-4">
-                    <div class="col-lg-8">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Recent Applications</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Job Title</th>
-                                                <th>Company</th>
-                                                <th>Applied Date</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>Frontend Developer</td>
-                                                <td>WebCorp</td>
-                                                <td>2 days ago</td>
-                                                <td><span class="badge bg-warning">Under Review</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td>React Developer</td>
-                                                <td>TechStart</td>
-                                                <td>5 days ago</td>
-                                                <td><span class="badge bg-success">Interview Scheduled</span></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Software Engineer</td>
-                                                <td>BigTech Inc</td>
-                                                <td>1 week ago</td>
-                                                <td><span class="badge bg-primary">Applied</span></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+                        <span class="match-badge match-purple" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #fff; background: #a21caf; display: inline-block;">93% Match</span>
                     </div>
-                    
-                    <!-- Profile Completion -->
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Profile Completion</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small>Overall Progress</small>
-                                        <small>95%</small>
-                                    </div>
-                                    <div class="progress mb-3">
-                                        <div class="progress-bar bg-success" style="width: 95%"></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="small">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>✅ Basic Info</span>
-                                        <span class="text-success">Complete</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>✅ Work Experience</span>
-                                        <span class="text-success">Complete</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>⚠️ Skills</span>
-                                        <span class="text-warning">Update Needed</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-3">
-                                        <span>✅ Resume</span>
-                                        <span class="text-success">Uploaded</span>
-                                    </div>
-                                </div>
-                                
-                                <button class="btn btn-outline-primary btn-sm w-100">Complete Profile</button>
-                            </div>
-                        </div>
+                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>AI/ML Engineer</strong></div>
+                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">SmartAI Solutions &bull; Remote</div>
+                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Build and deploy machine learning models for real-world business problems.</div>
+                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 150,000 - NPR 220,000</div>
+                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
+                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
                     </div>
                 </div>
-
-                <!-- Activity Feed -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Recent Activity</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="timeline">
-                                    <div class="d-flex mb-3">
-                                        <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; min-width: 40px;">
-                                            <span class="text-white small">📝</span>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-1">Applied to Frontend Developer position</h6>
-                                            <p class="text-muted small mb-0">WebCorp • 2 days ago</p>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex mb-3">
-                                        <div class="bg-success rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; min-width: 40px;">
-                                            <span class="text-white small">📞</span>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-1">Interview scheduled with TechStart</h6>
-                                            <p class="text-muted small mb-0">React Developer position • 3 days ago</p>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex mb-3">
-                                        <div class="bg-info rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; min-width: 40px;">
-                                            <span class="text-white small">💾</span>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-1">Saved 3 new job opportunities</h6>
-                                            <p class="text-muted small mb-0">Based on your preferences • 1 week ago</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+                        <span class="match-badge match-cyan" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #fff; background: #06b6d4; display: inline-block;">97% Match</span>
+                    </div>
+                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>Data Scientist</strong></div>
+                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">Insight Analytics &bull; Kathmandu</div>
+                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Analyze large datasets and deliver actionable insights for business growth.</div>
+                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 110,000 - NPR 170,000</div>
+                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
+                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
+                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // On page load, set theme from localStorage
+        window.onload = function() {
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
+        };
+    </script>
 </body>
 </html>
