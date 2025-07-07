@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Browse Jobs - JobMatch</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #23272f;
+            color: #fff;
+            transition: background 0.3s, color 0.3s;
+        }
+        .sidebar {
+            width: 240px;
+            height: 100vh;
+            background: #fff;
+            padding: 32px 0 0 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #23272f;
+            font-family: Arial, sans-serif;
+        }
+        .sidebar h2 {
+            margin-bottom: 32px;
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #23272f;
+            font-family: Arial, sans-serif;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+        .sidebar ul li {
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        .sidebar ul li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: #23272f;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            font-family: Arial, sans-serif;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sidebar ul li a .icon {
+            margin-right: 12px;
+            font-size: 1.3em;
+        }
+        .sidebar ul li.active a,
+        .sidebar ul li a:hover {
+            background: #2563eb;
+            color: #fff;
+        }
+        .sidebar ul li.active a .icon,
+        .sidebar ul li a:hover .icon {
+            color: #fff;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+            margin-left: 260px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 24px;
+            color: #2563eb;
+        }
+        .jobs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .job-row {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid #e5e7eb;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .job-info {
+            flex: 1 1 350px;
+        }
+        .job-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        .job-company {
+            color: #555;
+            font-size: 0.98rem;
+            margin-bottom: 6px;
+        }
+        .job-desc {
+            color: #444;
+            font-size: 0.97rem;
+            margin-bottom: 6px;
+        }
+        .job-salary {
+            color: #2563eb;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .apply-btn, .save-btn-interesting {
+            background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
+            background-size: 200% 200%;
+            animation: blueShift 4s ease-in-out infinite;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            padding: 7px 22px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.10);
+            transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 90px;
+            min-height: 38px;
+        }
+        @keyframes blueShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .apply-btn:hover, .save-btn-interesting:hover {
+            background: linear-gradient(90deg, #3b82f6, #2563eb, #60a5fa);
+            background-size: 200% 200%;
+            animation: blueShift 4s ease-in-out infinite;
+            color: white;
+            box-shadow: 0 4px 16px rgba(37,99,235,0.18);
+        }
+        .save-btn-interesting span {
+            margin-right: 6px;
+            font-size: 1.1em;
+        }
+        /* Light mode overrides */
+        .light-mode {
+            background: #f4f6fa !important;
+            color: #23272f !important;
+        }
+        .light-mode .sidebar {
+            background: #fff !important;
+            color: #23272f !important;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.04);
+        }
+        .light-mode .sidebar h2 {
+            color: #23272f !important;
+        }
+        .light-mode .sidebar ul li a {
+            color: #23272f !important;
+        }
+        .light-mode .sidebar ul li.active a,
+        .light-mode .sidebar ul li a:hover {
+            background: #2563eb !important;
+            color: #fff !important;
+        }
+        .light-mode .container {
+            background: #f4f6fa !important;
+            color: #23272f !important;
+        }
+        .light-mode .job-row {
+            background: #fff !important;
+            border: 1px solid #e5e7eb;
+        }
+        .light-mode h1 {
+            color: #2563eb !important;
+        }
+        @media (max-width: 700px) {
+            .container {
+                margin-left: 0;
+            }
+            .job-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .job-info {
+                width: 100%;
+            }
+        }
+        .navbar {
+            background: linear-gradient(135deg, #6a5094 0%, #a4508b 50%, #f0f2f5 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease-in-out infinite;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: bold;
+            transition: opacity 0.3s ease;
+        }
+        .navbar a:hover {
+            opacity: 0.8;
+        }
+        .navbar-logo {
+            font-family: 'Pacifico', cursive;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-right: 30px;
+            min-width: 120px;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .main-content {
+            margin-left: 240px;
+            padding: 32px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-logo">JobMatch</div>
+        <div>
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="login.html">Logout</a>
+        </div>
+    </div>
+    <div class="sidebar">
+        <h2>JobMatch</h2>
+        <ul>
+            <li>
+                <a href="dashboard.html">
+                    <img class="icon" src="https://img.icons8.com/color/28/000000/combo-chart--v2.png" alt="Dashboard"/>
+                    Dashboard
+                </a>
+            </li>
+            <li class="active">
+                <a href="browse jobs.html">
+                    <img class="icon" src="https://img.icons8.com/color/28/000000/search--v2.png" alt="Browse Jobs"/>
+                    Browse Jobs
+                </a>
+            </li>
+            <li>
+                <a href="saved jobs.html">
+                    <img class="icon" src="https://img.icons8.com/color/28/000000/save--v2.png" alt="Saved Jobs"/>
+                    Saved Jobs
+                </a>
+            </li>
+            <li>
+                <a href="profile.html">
+                    <img class="icon" src="https://img.icons8.com/color/28/000000/user-male-circle--v2.png" alt="Profile"/>
+                    Profile
+                </a>
+            </li>
+            <li>
+                <a href="setting.html">
+                    <img class="icon" src="https://img.icons8.com/color/28/000000/settings--v2.png" alt="Settings"/>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="container">
+        <h1>Browse Jobs</h1>
+        <div class="jobs-list">
+            <!-- Dashboard jobs -->
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Fullstack Developer</div>
+                    <div class="job-company">CodeHub Pvt. Ltd. • Kathmandu</div>
+                    <div class="job-desc">Work on modern web and mobile applications using MERN stack and REST APIs.</div>
+                    <div class="job-salary">NPR 120,000 - NPR 180,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Graphic Designer</div>
+                    <div class="job-company">PixelWorks • Lalitpur</div>
+                    <div class="job-desc">Design creative graphics, logos, and UI assets for digital products and marketing.</div>
+                    <div class="job-salary">NPR 60,000 - NPR 100,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Database Engineer</div>
+                    <div class="job-company">DataSecure • Remote</div>
+                    <div class="job-desc">Design, optimize, and maintain large-scale SQL/NoSQL databases for enterprise clients.</div>
+                    <div class="job-salary">NPR 100,000 - NPR 160,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Android Developer</div>
+                    <div class="job-company">Appify Nepal • Pokhara</div>
+                    <div class="job-desc">Develop and maintain Android apps for local and international clients.</div>
+                    <div class="job-salary">NPR 80,000 - NPR 130,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">AI/ML Engineer</div>
+                    <div class="job-company">SmartAI Solutions • Remote</div>
+                    <div class="job-desc">Build and deploy machine learning models for real-world business problems.</div>
+                    <div class="job-salary">NPR 150,000 - NPR 220,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Data Scientist</div>
+                    <div class="job-company">Insight Analytics • Kathmandu</div>
+                    <div class="job-desc">Analyze large datasets and deliver actionable insights for business growth.</div>
+                    <div class="job-salary">NPR 110,000 - NPR 170,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <!-- 20 more computer-related jobs -->
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Web Developer</div>
+                    <div class="job-company">WebNest • Kathmandu</div>
+                    <div class="job-desc">Develop responsive websites and web apps using HTML, CSS, JavaScript.</div>
+                    <div class="job-salary">NPR 70,000 - NPR 120,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">QA Engineer</div>
+                    <div class="job-company">Testify • Lalitpur</div>
+                    <div class="job-desc">Test software products, write test cases, and automate regression tests.</div>
+                    <div class="job-salary">NPR 60,000 - NPR 110,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Network Administrator</div>
+                    <div class="job-company">NetSecure • Kathmandu</div>
+                    <div class="job-desc">Manage and secure LAN/WAN networks for enterprise clients.</div>
+                    <div class="job-salary">NPR 90,000 - NPR 140,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Cybersecurity Analyst</div>
+                    <div class="job-company">CyberGuard • Remote</div>
+                    <div class="job-desc">Monitor and respond to security incidents, perform vulnerability assessments.</div>
+                    <div class="job-salary">NPR 110,000 - NPR 170,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Cloud Engineer</div>
+                    <div class="job-company">Cloudify • Kathmandu</div>
+                    <div class="job-desc">Design and manage cloud infrastructure on AWS, Azure, or GCP.</div>
+                    <div class="job-salary">NPR 120,000 - NPR 180,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">DevOps Engineer</div>
+                    <div class="job-company">AgileOps • Lalitpur</div>
+                    <div class="job-desc">Automate CI/CD pipelines and manage deployment workflows.</div>
+                    <div class="job-salary">NPR 100,000 - NPR 160,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Frontend Developer</div>
+                    <div class="job-company">UIX Studio • Kathmandu</div>
+                    <div class="job-desc">Create beautiful and interactive UIs using React, Vue, or Angular.</div>
+                    <div class="job-salary">NPR 80,000 - NPR 130,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Backend Developer</div>
+                    <div class="job-company">ServerSide • Remote</div>
+                    <div class="job-desc">Build scalable backend services with Node.js, Python, or Java.</div>
+                    <div class="job-salary">NPR 100,000 - NPR 150,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">IT Support Specialist</div>
+                    <div class="job-company">HelpDesk Nepal • Kathmandu</div>
+                    <div class="job-desc">Provide technical support and troubleshooting for end users.</div>
+                    <div class="job-salary">NPR 50,000 - NPR 90,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">UI/UX Designer</div>
+                    <div class="job-company">DesignNest • Lalitpur</div>
+                    <div class="job-desc">Design user interfaces and experiences for web and mobile apps.</div>
+                    <div class="job-salary">NPR 70,000 - NPR 120,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">System Administrator</div>
+                    <div class="job-company">SysAdminPro • Kathmandu</div>
+                    <div class="job-desc">Maintain and monitor Linux/Windows servers and IT infrastructure.</div>
+                    <div class="job-salary">NPR 90,000 - NPR 140,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Product Manager</div>
+                    <div class="job-company">Prodify • Remote</div>
+                    <div class="job-desc">Lead product development teams and manage product roadmaps.</div>
+                    <div class="job-salary">NPR 130,000 - NPR 200,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Business Analyst</div>
+                    <div class="job-company">BizTech • Kathmandu</div>
+                    <div class="job-desc">Analyze business requirements and bridge the gap with IT teams.</div>
+                    <div class="job-salary">NPR 80,000 - NPR 130,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Mobile App Developer</div>
+                    <div class="job-company">AppMakers • Lalitpur</div>
+                    <div class="job-desc">Develop cross-platform mobile apps using Flutter or React Native.</div>
+                    <div class="job-salary">NPR 90,000 - NPR 150,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Machine Learning Engineer</div>
+                    <div class="job-company">MLNepal • Kathmandu</div>
+                    <div class="job-desc">Develop and deploy ML models for various business applications.</div>
+                    <div class="job-salary">NPR 120,000 - NPR 200,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">IT Project Manager</div>
+                    <div class="job-company">PMNepal • Remote</div>
+                    <div class="job-desc">Manage IT projects, teams, and deliverables for clients.</div>
+                    <div class="job-salary">NPR 130,000 - NPR 210,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Security Engineer</div>
+                    <div class="job-company">SecureIT • Kathmandu</div>
+                    <div class="job-desc">Implement and monitor security measures for IT systems.</div>
+                    <div class="job-salary">NPR 110,000 - NPR 170,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Technical Writer</div>
+                    <div class="job-company">DocuTech • Lalitpur</div>
+                    <div class="job-desc">Write technical documentation, manuals, and user guides.</div>
+                    <div class="job-salary">NPR 60,000 - NPR 100,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Game Developer</div>
+                    <div class="job-company">GameWorks • Kathmandu</div>
+                    <div class="job-desc">Design and develop 2D/3D games for mobile and desktop platforms.</div>
+                    <div class="job-salary">NPR 90,000 - NPR 150,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+            <div class="job-row">
+                <div class="job-info">
+                    <div class="job-title">Support Engineer</div>
+                    <div class="job-company">SupportPro • Remote</div>
+                    <div class="job-desc">Provide technical support for software and hardware issues.</div>
+                    <div class="job-salary">NPR 70,000 - NPR 110,000</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button class="apply-btn">Apply</button>
+                    <button class="save-btn-interesting"><span style='margin-right:6px;'>★</span>Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // On page load, set theme from localStorage
+        window.onload = function() {
+            if (localStorage.getItem('theme') === 'light') {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            function getJobInfo(jobRow) {
+                return {
+                    title: jobRow.querySelector('.job-title').textContent.trim(),
+                    company: jobRow.querySelector('.job-company').textContent.trim(),
+                    desc: jobRow.querySelector('.job-desc').textContent.trim(),
+                    salary: jobRow.querySelector('.job-salary').textContent.trim(),
+                };
+            }
+
+            function saveJob(job) {
+                let saved = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+                if (!saved.some(j => j.title === job.title && j.company === job.company)) {
+                    saved.push(job);
+                    localStorage.setItem('savedJobs', JSON.stringify(saved));
+                }
+            }
+
+            function isJobSaved(job) {
+                let saved = JSON.parse(localStorage.getItem('savedJobs') || '[]');
+                return saved.some(j => j.title === job.title && j.company === job.company);
+            }
+
+            function updateSaveButtons() {
+                document.querySelectorAll('.job-row').forEach(jobRow => {
+                    const job = getJobInfo(jobRow);
+                    const saveBtn = jobRow.querySelector('.save-btn-interesting');
+                    if (isJobSaved(job)) {
+                        saveBtn.textContent = 'Saved';
+                        saveBtn.disabled = true;
+                        saveBtn.style.opacity = 0.7;
+                    } else {
+                        saveBtn.textContent = '★ Save';
+                        saveBtn.disabled = false;
+                        saveBtn.style.opacity = 1;
+                    }
+                });
+            }
+
+            document.querySelectorAll('.save-btn-interesting').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const jobRow = this.closest('.job-row');
+                    const job = getJobInfo(jobRow);
+                    saveJob(job);
+                    updateSaveButtons();
+                    // Debug: show what is being saved
+                    console.log('Saved job:', job);
+                });
+            });
+
+            // Initial update on page load
+            updateSaveButtons();
+
+            // Listen for changes to localStorage from other tabs/windows (e.g., when removing from saved jobs)
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'savedJobs') {
+                    updateSaveButtons();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
