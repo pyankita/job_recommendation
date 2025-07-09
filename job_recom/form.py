@@ -40,3 +40,5 @@ class JobRatingForm(forms.Form):
         max_value=5,
         widget=forms.NumberInput(attrs={'min': 1, 'max': 5})
     )
+
+

@@ -85,10 +85,8 @@ class JobInteraction(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     interaction_type = models.CharField(max_length=20, choices=[
         ('view', 'View'),
-        ('like', 'Like'),
         ('apply', 'Apply'),
         ('save', 'Save'),
-        ('dislike', 'Dislike')
     ])
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
