@@ -5,8 +5,13 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Avg, Count
 from django.http import Http404
 from .models import Job, UserProfile, JobInteraction, Company, User
-from .recommendation_engine import JobRecommendationEngine
-from .forms import UserProfileForm, JobSearchForm, JobRatingForm
+from django.contrib.auth.views import LoginView, LogoutView
+#from .  import JobRecommendationEngine
+#from .forms import UserProfileForm, JobSearchForm, JobRatingForm
+from django.urls import reverse_lazy
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm
+from django.views.generic.edit import CreateView
 
 def home(request):
     """Home page with featured jobs"""
@@ -19,7 +24,10 @@ def home(request):
         'total_jobs': Job.objects.filter(is_active=True).count(),
         'total_companies': Company.objects.count(),
     }
-    return render(request, 'jobs/home.html', context)
+    return render(request, 'home.html', context)
+
+
+
 
 def job_list(request):
     """List all jobs with search and filtering"""
@@ -253,3 +261,19 @@ def apply_job(request, job_id):
     return redirect('job_detail', job_id=job.id)
 
 
+
+class CustomLoginView(LoginView):
+    template_name = 'login.html'
+    authentication_form = AuthenticationForm
+
+class CustomLogoutView(LogoutView):
+    next_page = reverse_lazy('login')  # Redirect to login page after logout
+    template_name = 'templates/index.html'  # Your logged out template
+
+class RegisterView(CreateView):
+    form_class = UserCreationForm
+    template_name = 'register.html'
+    success_url = reverse_lazy('login')
+
+def about(request):
+    return render(request, 'about.html')

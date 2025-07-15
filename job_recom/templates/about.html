@@ -1,41 +1,44 @@
-{% extends 'job_recom/index.html' %}
-{% block content%}
- 
-    <!-- About Section -->
-    <div class="section">
-        <h2>About JobMatch</h2>
-        <p class="subtitle">Your trusted partner in career advancement</p>
-        <div class="features">
-            <div class="feature-box">
-                <div class="feature-icon">🎯</div>
-                <h3>Smart Matching</h3>
-                <p>Advanced algorithms match you with the right opportunities</p>
-            </div>
-            <div class="feature-box">
-                <div class="feature-icon">⏰</div>
-                <h3>Always Available</h3>
-                <p>Search and apply for jobs anytime, anywhere</p>
-            </div>
-            <div class="feature-box">
-                <div class="feature-icon">💰</div>
-                <h3>No Cost</h3>
-                <p>Start your job search journey at no cost</p>
-            </div>
+{% extends 'base.html' %}
+
+{% block title %}About - JobMatch{% endblock %}
+
+{% block content %}
+<div class="section" style="padding: 60px 20px; text-align: center;">
+    <h2>About JobMatch</h2>
+    <p class="subtitle" style="color:#555; font-size:1.2rem; margin-bottom:30px;">Your trusted partner in career advancement</p>
+    
+    <div class="features" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 40px;">
+        <div class="feature-box" style="background: white; padding: 20px; border-radius: 8px; width: 280px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+            <div class="feature-icon" style="font-size: 30px; margin-bottom: 10px;">🎯</div>
+            <h3>Smart Matching</h3>
+            <p>Advanced algorithms match you with the right opportunities</p>
         </div>
-        <div class="description">
-            <p>
-                JobMatch is an innovative job recommendation platform designed to simplify the job hunting process.
-                Using a hybrid approach that combines content-based filtering and collaborative filtering, JobMatch
-                provides highly accurate and personalized job suggestions.
-            </p>
-            <p>
-                Our system leverages cutting-edge AI algorithms to understand your preferences, skills, and job history
-                to match you with the most suitable opportunities. It's intuitive, fast, and completely free to use.
-            </p>
-            <p>
-                Whether you're a fresh graduate or an experienced professional, JobMatch helps you take the next step in
-                your career with confidence.
-            </p>
+        <div class="feature-box" style="background: white; padding: 20px; border-radius: 8px; width: 280px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+            <div class="feature-icon" style="font-size: 30px; margin-bottom: 10px;">⏰</div>
+            <h3>Always Available</h3>
+            <p>Search and apply for jobs anytime, anywhere</p>
+        </div>
+        <div class="feature-box" style="background: white; padding: 20px; border-radius: 8px; width: 280px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+            <div class="feature-icon" style="font-size: 30px; margin-bottom: 10px;">💰</div>
+            <h3>No Cost</h3>
+            <p>Start your job search journey at no cost</p>
         </div>
     </div>
+
+    <div class="description" style="max-width: 700px; margin: 0 auto; color: #555; line-height: 1.6; font-size: 1.1rem;">
+        <p>
+            JobMatch is an innovative job recommendation platform designed to simplify the job hunting process.
+            Using a hybrid approach that combines content-based filtering and collaborative filtering, JobMatch
+            provides highly accurate and personalized job suggestions.
+        </p>
+        <p>
+            Our system leverages cutting-edge AI algorithms to understand your preferences, skills, and job history
+            to match you with the most suitable opportunities. It's intuitive, fast, and completely free to use.
+        </p>
+        <p>
+            Whether you're a fresh graduate or an experienced professional, JobMatch helps you take the next step in
+            your career with confidence.
+        </p>
+    </div>
+</div>
 {% endblock %}

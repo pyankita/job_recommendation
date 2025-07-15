@@ -1,29 +1,30 @@
-{% extends 'job_recom/base.html' %}
+
+{% extends 'base.html' %}
 
 {% block title %}Login - JobMatch{% endblock %}
 
 {% block content %}
-<div class="login-section">
-    <div class="login-card">
+<div class="login-section" style="display:flex; justify-content:center; align-items:center; height:80vh;">
+    <div class="login-card" style="background:white; padding:2rem; border-radius:8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width:300px;">
         <h2>Welcome Back!</h2>
         <p>Sign in to your JobMatch account</p>
         <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required style="width:100%; padding:8px; margin-bottom:10px;">
 
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required style="width:100%; padding:8px; margin-bottom:10px;">
 
-            <div class="form-check">
+            <div class="form-check" style="margin-bottom:10px;">
                 <input type="checkbox" id="rememberMe" name="rememberMe">
                 <label for="rememberMe">Remember me</label>
             </div>
 
-            <button type="submit" class="login-btn">Sign In</button>
+            <button type="submit" class="login-btn" style="background:#6a5094; color:white; border:none; padding:10px; width:100%; cursor:pointer;">Sign In</button>
         </form>
 
-        <div class="login-footer">
+        <div class="login-footer" style="margin-top:1rem; text-align:center;">
             <p>Don't have an account? <a href="{% url 'register' %}">Create Account</a></p>
         </div>
     </div>

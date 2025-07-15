@@ -1,62 +1,19 @@
-{% extends 'job_recom/index.html' %}
+{% extends 'base.html' %}
 
-{% block content%}
+{% block title %}Register - JobMatch{% endblock %}
 
-
-
-
-    <div class="register-section">
-        <div class="register-card">
-            <h2>Create Your JobMatch Account</h2>
-            <p>Join thousands of job seekers finding their perfect match</p>
-
-            <form>
-                <div class="form-section">
-                    <h5>Personal Information</h5>
-                    <div class="form-group">
-                        <label for="firstName">First Name *</label>
-                        <input type="text" id="firstName" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name *</label>
-                        <input type="text" id="lastName" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email Address *</label>
-                        <input type="email" id="email" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" />
-                    </div>
-                    <div class="form-group">
-                        <label for="location">Location</label>
-                        <input type="text" id="location" placeholder="City, State" />
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h5>Account Security</h5>
-                    <div class="form-group">
-                        <label for="password">Password *</label>
-                        <input type="password" id="password" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm Password *</label>
-                        <input type="password" id="confirmPassword" required />
-                    </div>
-                </div>
-
-                <div class="form-group checkbox-group" style="display: flex; align-items: center; gap: 20px;">
-                    <label><input type="checkbox" id="terms" required /> I agree to the Terms of Service and Privacy
-                        Policy *</label>
-                    <label><input type="checkbox" id="newsletter" /> Subscribe to job alerts and newsletters</label>
-                </div>
-
-                <button type="submit" class="submit-btn">Create Account</button>
-            </form>
+{% block content %}
+<div class="login-section" style="display:flex; justify-content:center; align-items:center; height:80vh;">
+    <div class="login-card" style="background:white; padding:2rem; border-radius:8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width:300px;">
+        <h2>Create an Account</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="login-btn" style="background:#6a5094; color:white; border:none; padding:10px; width:100%; cursor:pointer;">Register</button>
+        </form>
+        <div class="login-footer" style="margin-top:1rem; text-align:center;">
+            <p>Already have an account? <a href="{% url 'login' %}">Sign In</a></p>
         </div>
     </div>
-
-
+</div>
 {% endblock %}
