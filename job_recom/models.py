@@ -36,6 +36,7 @@ class Job(models.Model):
     contact_email = models.EmailField(blank=True,null=True)
     required_skills = models.TextField(blank=True,null=True)
     education_level = models.CharField(max_length=100,blank=True,null=True)
+    is_active = models.BooleanField(default=True,blank=True,null=True)
 
     def __str__(self):
         return f"{self.title} at {self.company.name}"
