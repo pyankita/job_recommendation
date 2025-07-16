@@ -10,10 +10,12 @@ class CompanyAdmin(admin.ModelAdmin):
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    list_display = ['title', 'company', 'location', 'experience_level', 'job_type', 'is_active', 'posted_date']
-    list_filter = ['experience_level', 'job_type', 'is_active', 'company__industry']
-    search_fields = ['title', 'company__name', 'skills_required']
-    date_hierarchy = 'posted_date'
+    # Use only fields that exist on Job model
+    list_display = ['title', 'company', 'location', 'category', 'created_date', 'deadline']
+    list_filter = ['category', 'location', 'company']
+    search_fields = ['title', 'company__name', 'required_skills', 'description']
+    # Use a valid date field for hierarchy, e.g. created_date
+    date_hierarchy = 'created_date'
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):

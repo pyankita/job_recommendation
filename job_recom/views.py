@@ -26,9 +26,6 @@ def home(request):
     }
     return render(request, 'home.html', context)
 
-
-
-
 def job_list(request):
     """List all jobs with search and filtering"""
     form = JobSearchForm(request.GET or None)
@@ -266,14 +263,13 @@ class CustomLoginView(LoginView):
     template_name = 'login.html'
     authentication_form = AuthenticationForm
 
-class CustomLogoutView(LogoutView):
-    next_page = reverse_lazy('login')  # Redirect to login page after logout
-    template_name = 'templates/index.html'  # Your logged out template
-
 class RegisterView(CreateView):
     form_class = UserCreationForm
     template_name = 'register.html'
-    success_url = reverse_lazy('login')
+    success_url = reverse_lazy('home')
 
+class CustomLogoutView(LogoutView):
+    next_page = reverse_lazy('home') 
+    
 def about(request):
     return render(request, 'about.html')
