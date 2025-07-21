@@ -9,11 +9,11 @@ from django.urls import reverse_lazy
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.views.generic.edit import CreateView
 
-# Import your recommendation engine class (adjust path if needed)
-#from . import JobRecommendationEngine
+#Import your recommendation engine class (adjust path if needed)
+from .management.commands.recommendation import JobRecommendationEngine
 
 # Uncomment and import your forms if you have them:
-# from .forms import UserProfileForm, JobSearchForm, JobRatingForm
+from .forms import UserProfileForm, JobSearchForm, JobRatingForm
 
 @login_required
 def dashboard(request):
@@ -130,7 +130,7 @@ def job_detail(request, job_id):
         'user_rating': user_rating,
         'skills_list': job.required_skills.split(',') if job.required_skills else [],
     }
-    return render(request, 'jobs/job_detail.html', context)
+    return render(request, 'job_detail.html', context)
 
 @login_required
 def recommendations(request):
@@ -279,3 +279,6 @@ def about(request):
     return render(request, 'about.html')
 def home(request):
     return render(request, 'home.html')
+
+def job(request):
+    return render(request, 'browse_jobs.html')

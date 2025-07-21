@@ -52,12 +52,12 @@ class UserProfile(models.Model):
     experience_years = models.IntegerField(default=0,blank=True,null=True)
     preferred_location = models.CharField(max_length=200,blank=True,null=True)
     preferred_salary_min = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    preferred_job_type = models.CharField(max_length=20, choices=[
-        ('full_time', 'Full Time'),
-        ('part_time', 'Part Time'),
-        ('contract', 'Contract'),
-        ('internship', 'Internship')
-    ],blank=True,null=True)
+    # preferred_job_type = models.CharField(max_length=20, choices=[
+    #     ('full_time', 'Full Time'),
+    #     ('part_time', 'Part Time'),
+    #     ('contract', 'Contract'),
+    #     ('internship', 'Internship')
+    # ],blank=True,null=True)
     preferred_remote = models.BooleanField(default=False,blank=True,null=True)
     bio = models.TextField(blank=True,null=True)
     

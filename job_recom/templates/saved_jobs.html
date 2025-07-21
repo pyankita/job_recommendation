@@ -1,0 +1,100 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block title %}Saved Jobs - JobMatch{% endblock %}
+
+{% block content %}
+<style>
+    .saved-jobs-container {
+        max-width: 900px;
+        margin: 40px auto 60px auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .saved-job {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #ddd;
+        padding: 16px 20px;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgb(0 0 0 / 0.05);
+        transition: box-shadow 0.3s ease;
+    }
+    .saved-job:hover {
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+    }
+    .saved-job-info {
+        flex: 1;
+        margin-right: 20px;
+    }
+    .saved-job-info > div {
+        margin-bottom: 6px;
+    }
+    .job-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1e40af; /* blue-800 */
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .job-company {
+        color: #444;
+        font-weight: 500;
+    }
+    .job-desc {
+        color: #555;
+        font-size: 0.9rem;
+        max-height: 48px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .job-salary {
+        color: #2563eb; /* blue-600 */
+        font-weight: 600;
+    }
+    .remove-form {
+        margin: 0;
+    }
+    .remove-btn {
+        background-color: #ef4444; /* red-500 */
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .remove-btn:hover {
+        background-color: #b91c1c; /* red-700 */
+    }
+</style>
+
+<div class="saved-jobs-container">
+    {% if saved_interactions %}
+        {% for interaction in saved_interactions %}
+            <div class="saved-job">
+                <div class="saved-job-info">
+                    <a href="{% url 'job_detail' interaction.job.id %}" class="job-title">{{ interaction.job.title }}</a>
+                    <div class="job-company">{{ interaction.job.company.name }}</div>
+                    <div class="job-desc">
+                        {{ interaction.job.description|truncatechars:100 }}
+                    </div>
+                    <div class="job-salary">{{ interaction.job.salary_range }}</div>
+                </div>
+                <form method="post" action="{% url 'save_job' interaction.job.id %}" class="remove-form">
+                    {% csrf_token %}
+                    <button type="submit" class="remove-btn" title="Remove this job">Remove</button>
+                </form>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align:center; color:#888; font-size:1.2rem; margin-top:40px;">
+            You have no saved jobs yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

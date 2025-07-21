@@ -19,8 +19,8 @@ class JobAdmin(admin.ModelAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['user', 'experience_years', 'preferred_location', 'preferred_job_type']
-    list_filter = ['preferred_job_type', 'preferred_remote']
+    list_display = ['user', 'experience_years', 'preferred_location']
+    list_filter = [ 'preferred_remote']
     search_fields = ['user__username', 'skills']
 
 @admin.register(JobInteraction)

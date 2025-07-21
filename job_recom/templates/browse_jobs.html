@@ -1,0 +1,101 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+    <h1 class="mb-4">Browse Jobs</h1>
+
+    <!-- Search & Filters Form -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <input type="text" name="search_query" class="form-control" placeholder="Search jobs or companies" value="{{ request.GET.search_query }}">
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="location" class="form-control" placeholder="Location" value="{{ request.GET.location }}">
+        </div>
+        <div class="col-md-2">
+            <select name="job_type" class="form-select">
+                <option value="">All Job Types</option>
+                <option value="full-time" {% if request.GET.job_type == 'full-time' %}selected{% endif %}>Full-time</option>
+                <option value="part-time" {% if request.GET.job_type == 'part-time' %}selected{% endif %}>Part-time</option>
+                <option value="contract" {% if request.GET.job_type == 'contract' %}selected{% endif %}>Contract</option>
+                <option value="internship" {% if request.GET.job_type == 'internship' %}selected{% endif %}>Internship</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="experience_level" class="form-select">
+                <option value="">Experience Level</option>
+                <option value="entry" {% if request.GET.experience_level == 'entry' %}selected{% endif %}>Entry</option>
+                <option value="mid" {% if request.GET.experience_level == 'mid' %}selected{% endif %}>Mid</option>
+                <option value="senior" {% if request.GET.experience_level == 'senior' %}selected{% endif %}>Senior</option>
+            </select>
+        </div>
+        <div class="col-md-1 d-grid">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+
+    <!-- Jobs Summary -->
+    <p><strong>{{ page_obj.paginator.count }}</strong> job{{ page_obj.paginator.count|pluralize }} found.</p>
+
+    <!-- Job Listings -->
+    {% if page_obj.object_list %}
+        <div class="list-group">
+            {% for job in page_obj.object_list %}
+                <div class="list-group-item mb-3 p-3 border rounded shadow-sm">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="mb-1"><a href="{% url 'job_detail' job.id %}" class="text-decoration-none">{{ job.title }}</a></h5>
+                            <small class="text-muted">{{ job.company.name }} • {{ job.location }}</small><br>
+                            <small class="text-muted">Experience: {{ job.experience_level|capfirst }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="mb-2"><strong>{{ job.salary|default:"NPR Not specified" }}</strong></div>
+                            <a href="{% url 'apply_job' job.id %}" class="btn btn-success btn-sm mb-1">Apply</a>
+                            <a href="{% url 'save_job' job.id %}" class="btn btn-outline-primary btn-sm">Save</a>
+                        </div>
+                    </div>
+                    <p class="mt-2 mb-0">{{ job.description|truncatechars:150 }}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num == page_obj.number %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+        <p>No jobs found matching your criteria.</p>
+    {% endif %}
+
+</div>
+{% endblock %}
