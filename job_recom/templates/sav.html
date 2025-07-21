@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Saved Jobs - JobMatch</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <style>
+        .saved-job {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+            padding: 24px 28px;
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .saved-job-info {
+            flex: 1 1 350px;
+        }
+        .remove-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            padding: 7px 22px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.10);
+        }
+        .remove-btn:hover {
+            background: #1e40af;
+        }
+        .main-content-saved {
+            margin-left: 240px;
+            padding: 32px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    {% include "partials/navbar.html" %}
+    {% include "partials/sidebar.html" %}
+
+    <div class="main-content-saved">
+        <h2 style="margin-bottom: 24px;">Your Saved Jobs</h2>
+
+        {% if saved_interactions %}
+            {% for interaction in saved_interactions %}
+                <div class="saved-job">
+                    <div class="saved-job-info">
+                        <h3 style="margin-bottom: 6px;">{{ interaction.job.title }}</h3>
+                        <div style="color: #444;">{{ interaction.job.company.name }} &bull; {{ interaction.job.location }}</div>
+                        <p style="margin: 10px 0;">{{ interaction.job.description|truncatechars:150 }}</p>
+                        <p style="font-weight: bold; color: #2563eb;">NPR {{ interaction.job.salary }}</p>
+                    </div>
+                    <form action="{% url 'save_job' interaction.job.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="remove-btn">Remove</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #888; font-size: 1.1rem;">You haven’t saved any jobs yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

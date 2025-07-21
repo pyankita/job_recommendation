@@ -15,14 +15,20 @@ from django.views.generic.edit import CreateView
 # Uncomment and import your forms if you have them:
 # from .forms import UserProfileForm, JobSearchForm, JobRatingForm
 
+@login_required
 def dashboard(request):
-    """Home page with featured jobs"""
-    featured_jobs = Job.objects.filter(is_active=True).select_related('company')[:6]
-    latest_jobs = Job.objects.filter(is_active=True).select_related('company')[:8]
+    engine = JobRecommendationEngine()
+    recs = engine.hybrid_recommendations(request.user.id, 6)
+
+    job_ids = [rec[0] for rec in recs]
+    jobs = Job.objects.filter(id__in=job_ids, is_active=True).select_related('company')
+
+    score_map = {rec[0]: rec[1] for rec in recs}
+    for job in jobs:
+        job.score = score_map[job.id]['hybrid_score']
 
     context = {
-        'featured_jobs': featured_jobs,
-        'latest_jobs': latest_jobs,
+        'featured_jobs': sorted(jobs, key=lambda x: x.score, reverse=True),
         'total_jobs': Job.objects.filter(is_active=True).count(),
         'total_companies': Company.objects.count(),
     }

@@ -1,178 +1,49 @@
+{% extends 'base3.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - JobMatch</title>
-    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 
-</head>
-<body>
-    <div class="navbar">
-        <div class="navbar-logo">JobMatch</div>
-        <div>
-            <a href="{% url 'logout'%}">Logout</a>
+{% block content %}
+<div class="main-content" style="padding: 20px;">
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 class="dashboard-title" style="font-size: 1.8rem; font-weight: bold;">Dashboard</h1>
+        <div class="search-bar">
+            <input type="text" placeholder="Search jobs..." style="padding: 8px 12px; font-size: 1rem; border-radius: 6px; border: 1px solid #ccc;">
         </div>
     </div>
-    <div class="sidebar">
-        <h2>JobMatch</h2>
-        <ul>
-            <li class="active">
-                <a href="dashboard.html">
-                    <img class="icon" src="https://img.icons8.com/color/28/000000/combo-chart--v2.png" alt="Dashboard"/>
-                    Dashboard
-                </a>
-            </li>
-            <li>
-                <a href="browse jobs.html">
-                    <img class="icon" src="https://img.icons8.com/color/28/000000/search--v2.png" alt="Browse Jobs"/>
-                    Browse Jobs
-                </a>
-            </li>
-            <li>
-                <a href="saved jobs.html">
-                    <img class="icon" src="https://img.icons8.com/color/28/000000/save--v2.png" alt="Saved Jobs"/>
-                    Saved Jobs
-                </a>
-            </li>
-            <li>
-                <a href="profile.html">
-                    <img class="icon" src="https://img.icons8.com/color/28/000000/user-male-circle--v2.png" alt="Profile"/>
-                    Profile
-                </a>
-            </li>
-            <li>
-                <a href="setting.html">
-                    <img class="icon" src="https://img.icons8.com/color/28/000000/settings--v2.png" alt="Settings"/>
-                    Settings
-                </a>
-            </li>
-        </ul>
-    </div>
-    <div class="main-content">
-        <div class="dashboard-header">
-            <h1 class="dashboard-title">Dashboard</h1>
-            <div class="search-bar">
-                <input type="text" placeholder="Search jobs...">
-            </div>
-        </div>
 
-        <div class="stats-grid">
-            <div class="stat-card stat-blue">
-                <div class="stat-number">12</div>
-                <div class="stat-label">Applications Sent</div>
-            </div>
-            <div class="stat-card stat-green">
-                <div class="stat-number">3</div>
-                <div class="stat-label">Interview Requests</div>
-            </div>
-            <div class="stat-card stat-orange">
-                <div class="stat-number">8</div>
-                <div class="stat-label">Saved Jobs</div>
-            </div>
-            <div class="stat-card stat-cyan">
-                <div class="stat-number">95%</div>
-                <div class="stat-label">Profile Complete</div>
-            </div>
+    <div class="section jobs-section" style="background: #fff; border-radius: 10px; padding: 24px 18px 18px 18px; border: 1px solid #e5e7eb;">
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <h3 class="section-title" style="font-size: 1.25rem; font-weight: bold; color: #23272f; margin: 0;">Recommended Jobs</h3>
+            <a href="{% url 'browse_jobs' %}" class="view-all-btn" style="background: none; border: 1px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 4px 16px; font-size: 1rem; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s;">View All</a>
         </div>
-
-        <div class="section jobs-section" style="background: #fff; border-radius: 10px; padding: 24px 18px 18px 18px; margin-bottom: 32px; border: 1px solid #e5e7eb;">
-            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h3 class="section-title" style="font-size: 1.25rem; font-weight: bold; color: #23272f; margin: 0;">Recommended Jobs</h3>
-                <a href="#" class="view-all-btn" style="background: none; border: 1px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 4px 16px; font-size: 1rem; cursor: pointer; text-decoration: none; transition: background 0.2s, color 0.2s;">View All</a>
-            </div>
-            <div class="jobs-row" style="display: flex; gap: 24px; flex-wrap: wrap;">
-                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-                        <span class="match-badge match-green" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #fff; background: #16a34a; display: inline-block;">95% Match</span>
-                    </div>
-                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>Fullstack Developer</strong></div>
-                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">CodeHub Pvt. Ltd. &bull; Kathmandu</div>
-                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Work on modern web and mobile applications using MERN stack and REST APIs.</div>
-                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 120,000 - NPR 180,000</div>
-                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
-                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
-                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
-                    </div>
+        
+        <div class="jobs-row" style="display: flex; gap: 24px; flex-wrap: wrap;">
+            {% for job in jobs %}
+            <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 4px;">
+                    <strong>{{ job.title }}</strong>
                 </div>
-                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-                        <span class="match-badge match-yellow" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #23272f; background: #fbbf24; display: inline-block;">88% Match</span>
-                    </div>
-                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>Graphic Designer</strong></div>
-                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">PixelWorks &bull; Lalitpur</div>
-                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Design creative graphics, logos, and UI assets for digital products and marketing.</div>
-                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 60,000 - NPR 100,000</div>
-                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
-                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
-                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
-                    </div>
+                <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">
+                    {{ job.company }} &bull; {{ job.location }}
                 </div>
-                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-                        <span class="match-badge match-cyan" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #fff; background: #06b6d4; display: inline-block;">91% Match</span>
-                    </div>
-                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>Database Engineer</strong></div>
-                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">DataSecure &bull; Remote</div>
-                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Design, optimize, and maintain large-scale SQL/NoSQL databases for enterprise clients.</div>
-                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 100,000 - NPR 160,000</div>
-                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
-                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
-                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
-                    </div>
+                <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">
+                    {{ job.description }}
                 </div>
-                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-                        <span class="match-badge match-blue" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #fff; background: #2563eb; display: inline-block;">89% Match</span>
-                    </div>
-                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>Android Developer</strong></div>
-                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">Appify Nepal &bull; Pokhara</div>
-                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Develop and maintain Android apps for local and international clients.</div>
-                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 80,000 - NPR 130,000</div>
-                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
-                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
-                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
-                    </div>
+                <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">
+                    {{ job.salary }}
                 </div>
-                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-                        <span class="match-badge match-purple" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #fff; background: #a21caf; display: inline-block;">93% Match</span>
-                    </div>
-                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>AI/ML Engineer</strong></div>
-                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">SmartAI Solutions &bull; Remote</div>
-                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Build and deploy machine learning models for real-world business problems.</div>
-                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 150,000 - NPR 220,000</div>
-                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
-                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
-                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
-                    </div>
-                </div>
-                <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 18px 14px 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-                    <div class="job-card-header" style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-                        <span class="match-badge match-cyan" style="font-size: 0.95rem; font-weight: bold; border-radius: 6px; padding: 3px 12px; color: #fff; background: #06b6d4; display: inline-block;">97% Match</span>
-                    </div>
-                    <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 2px;"><strong>Data Scientist</strong></div>
-                    <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">Insight Analytics &bull; Kathmandu</div>
-                    <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">Analyze large datasets and deliver actionable insights for business growth.</div>
-                    <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">NPR 110,000 - NPR 170,000</div>
-                    <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
-                        <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">Save</button>
-                        <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">Apply</button>
-                    </div>
+                <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
+                    <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">
+                        Save
+                    </button>
+                    <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+                        Apply
+                    </button>
                 </div>
             </div>
+            {% empty %}
+            <p>No recommended jobs found.</p>
+            {% endfor %}
         </div>
     </div>
-    <script>
-        // On page load, set theme from localStorage
-        window.onload = function() {
-            if (localStorage.getItem('theme') === 'light') {
-                document.body.classList.add('light-mode');
-            } else {
-                document.body.classList.remove('light-mode');
-            }
-        };
-    </script>
-</body>
-</html>
+</div>
+{% endblock %}
