@@ -34,6 +34,7 @@ def dashboard(request):
     }
     return render(request, 'dashboard.html', context)
 
+@login_required
 def job_list(request):
     """List all jobs with search and filtering"""
     # Make sure JobSearchForm is imported and exists
@@ -74,6 +75,7 @@ def job_list(request):
     }
     return render(request, 'browse_jobs.html', context)
 
+@login_required
 def job_detail(request, job_id):
     """Job detail page with interaction tracking"""
     job = get_object_or_404(Job, id=job_id, is_active=True)

@@ -1,5 +1,25 @@
 from django import forms
 from .models import UserProfile, Job
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
+class UserRegistrationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+
+    # Additional fields from UserProfile
+    skills = forms.CharField(widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'e.g., Python, Django'}), required=False)
+    experience_years = forms.IntegerField(min_value=0, required=False)
+    preferred_location = forms.CharField(max_length=200, required=False)
+    preferred_salary_min = forms.DecimalField(max_digits=10, decimal_places=2, required=False)
+    preferred_remote = forms.BooleanField(required=False)
+    bio = forms.CharField(widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Tell us about yourself...'}), required=False)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2', 
+                  'skills', 'experience_years', 'preferred_location',
+                  'preferred_salary_min', 'preferred_remote', 'bio']
 
 class UserProfileForm(forms.ModelForm):
     class Meta:

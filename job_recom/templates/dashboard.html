@@ -6,7 +6,9 @@
     <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1 class="dashboard-title" style="font-size: 1.8rem; font-weight: bold;">Dashboard</h1>
         <div class="search-bar">
-            <input type="text" placeholder="Search jobs..." style="padding: 8px 12px; font-size: 1rem; border-radius: 6px; border: 1px solid #ccc;">
+            <form method="GET" action="#">
+                <input type="text" name="search_query" placeholder="Search jobs..." style="padding: 8px 12px; font-size: 1rem; border-radius: 6px; border: 1px solid #ccc;">
+            </form>
         </div>
     </div>
 
@@ -17,27 +19,35 @@
         </div>
         
         <div class="jobs-row" style="display: flex; gap: 24px; flex-wrap: wrap;">
-            {% for job in jobs %}
+            {% for job in featured_jobs %}
             <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                 <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 4px;">
-                    <strong>{{ job.title }}</strong>
+                    <a href="{% url 'job_detail' job.id %}" style="text-decoration:none; color: inherit;">
+                        <strong>{{ job.title }}</strong>
+                    </a>
                 </div>
                 <div class="job-card-company" style="color: #555; font-size: 0.98rem; margin-bottom: 8px;">
-                    {{ job.company }} &bull; {{ job.location }}
+                    {{ job.company.name }} &bull; {{ job.location }}
                 </div>
                 <div class="job-card-desc" style="color: #444; font-size: 0.97rem; margin-bottom: 10px;">
-                    {{ job.description }}
+                    {{ job.description|truncatechars:150 }}
                 </div>
                 <div class="job-card-salary" style="color: #2563eb; font-weight: bold; margin-bottom: 12px;">
                     {{ job.salary }}
                 </div>
                 <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
-                    <button class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">
-                        Save
-                    </button>
-                    <button class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
-                        Apply
-                    </button>
+                    <form method="POST" action="#">
+                        {% csrf_token %}
+                        <button type="submit" class="save-btn" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s, color 0.2s;">
+                            Save
+                        </button>
+                    </form>
+                    <form method="POST" action="#">
+                        {% csrf_token %}
+                        <button type="submit" class="apply-btn" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer; transition: background 0.2s;">
+                            Apply
+                        </button>
+                    </form>
                 </div>
             </div>
             {% empty %}

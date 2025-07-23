@@ -10,7 +10,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from django.contrib.auth.models import User  # Make sure this is imported
-from ...models import Job, UserProfile, JobInteraction
+from .models import Job, UserProfile, JobInteraction
 
 
 class JobRecommendationEngine:

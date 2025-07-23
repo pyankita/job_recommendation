@@ -4,13 +4,74 @@
 
 {% block content %}
 <div class="login-section" style="display:flex; justify-content:center; align-items:center; height:80vh;">
-    <div class="login-card" style="background:white; padding:2rem; border-radius:8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width:300px;">
+    <div class="login-card" style="background:white; padding:2rem; border-radius:8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width:350px;">
         <h2>Create an Account</h2>
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+
+            <div class="form-group">
+                {{ form.username.label_tag }}<br>
+                {{ form.username }}
+                {{ form.username.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.email.label_tag }}<br>
+                {{ form.email }}
+                {{ form.email.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.password1.label_tag }}<br>
+                {{ form.password1 }}
+                {{ form.password1.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.password2.label_tag }}<br>
+                {{ form.password2 }}
+                {{ form.password2.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.skills.label_tag }}<br>
+                {{ form.skills }}
+                {{ form.skills.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.experience_years.label_tag }}<br>
+                {{ form.experience_years }}
+                {{ form.experience_years.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.preferred_location.label_tag }}<br>
+                {{ form.preferred_location }}
+                {{ form.preferred_location.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.preferred_salary_min.label_tag }}<br>
+                {{ form.preferred_salary_min }}
+                {{ form.preferred_salary_min.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.preferred_remote.label_tag }}<br>
+                {{ form.preferred_remote }}
+                {{ form.preferred_remote.errors }}
+            </div>
+
+            <div class="form-group">
+                {{ form.bio.label_tag }}<br>
+                {{ form.bio }}
+                {{ form.bio.errors }}
+            </div>
+
             <button type="submit" class="login-btn" style="background:#6a5094; color:white; border:none; padding:10px; width:100%; cursor:pointer;">Register</button>
         </form>
+
         <div class="login-footer" style="margin-top:1rem; text-align:center;">
             <p>Already have an account? <a href="{% url 'login' %}">Sign In</a></p>
         </div>
