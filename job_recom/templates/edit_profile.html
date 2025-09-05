@@ -1,0 +1,54 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - JobMatch{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin: 40px auto;">
+    <h2>Edit Profile</h2>
+    <form method="POST" action="{% url 'edit_profile' %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="firstName" class="form-label">First Name</label>
+            <input type="text" name="first_name" id="firstName" 
+                   class="form-control" value="{{ user.first_name }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="lastName" class="form-label">Last Name</label>
+            <input type="text" name="last_name" id="lastName" 
+                   class="form-control" value="{{ user.last_name }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email (read-only)</label>
+            <input type="email" name="email" id="email" 
+                   class="form-control" value="{{ user.email }}" readonly>
+        </div>
+
+        <div class="mb-3">
+            <label for="phone" class="form-label">Phone</label>
+            <input type="text" name="phone" id="phone" 
+                   class="form-control" value="{{ profile.phone }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="location" class="form-label">Location</label>
+            <input type="text" name="location" id="location" 
+                   class="form-control" value="{{ profile.location }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="newsletter" class="form-label">Newsletter Subscription</label>
+            <select name="newsletter" id="newsletter" class="form-select">
+                <option value="True" {% if profile.newsletter %}selected{% endif %}>Subscribed</option>
+                <option value="False" {% if not profile.newsletter %}selected{% endif %}>Not Subscribed</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

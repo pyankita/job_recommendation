@@ -9,6 +9,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.views.generic.edit import CreateView
 from .forms import UserRegistrationForm
+from .models import UserProfile 
 #Import your recommendation engine class (adjust path if needed)
 from .management.commands.recommendation import JobRecommendationEngine
 
@@ -238,6 +239,27 @@ def profile(request):
         'user_profile': user_profile,
     }
     return render(request, 'profile.html', context)
+
+
+
+@login_required
+def edit_profile(request):
+    profile, created = UserProfileProfile.objects.get_or_create(user=request.user)
+
+    if request.method == "POST":
+        request.user.first_name = request.POST.get("first_name")
+        request.user.last_name = request.POST.get("last_name")
+        request.user.save()
+
+        profile.phone = request.POST.get("phone")
+        profile.location = request.POST.get("location")
+        profile.newsletter = request.POST.get("newsletter") == "True"
+        profile.save()
+
+        return redirect("profile")  # Redirect back to profile page
+
+    return render(request, "edit_profile.html", {"profile": profile})
+
 
 @login_required
 def save_job(request, job_id):
