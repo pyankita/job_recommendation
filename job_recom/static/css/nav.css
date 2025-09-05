@@ -246,7 +246,7 @@ h1 {
     font-weight: bold;
     font-size: 1rem;
 }
-.apply-btn, .save-btn-interesting {
+/* .apply-btn, .save-btn-interesting {
     background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
     background-size: 200% 200%;
     animation: blueShift 4s ease-in-out infinite;
@@ -314,7 +314,7 @@ h1 {
 .light-mode h1 {
     color: #2563eb !important;
 }
-@media (max-width: 700px) {
+/* @media (max-width: 700px) {
     .container {
         margin-left: 0;
     }
@@ -366,4 +366,4 @@ h1 {
     margin-left: 240px;
     padding: 32px;
     font-family: Arial, sans-serif;
-}
+}  */

@@ -8,6 +8,8 @@ class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
     # Additional fields from UserProfile
+    first_name = forms.CharField(max_length=30, required=True)
+    last_name = forms.CharField(max_length=30, required=True)
     skills = forms.CharField(widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'e.g., Python, Django'}), required=False)
     experience_years = forms.IntegerField(min_value=0, required=False)
     preferred_location = forms.CharField(max_length=200, required=False)
@@ -17,7 +19,7 @@ class UserRegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2', 
+        fields = ['first_name', 'last_name','username', 'email', 'password1', 'password2', 
                   'skills', 'experience_years', 'preferred_location',
                   'preferred_salary_min', 'preferred_remote', 'bio']
 

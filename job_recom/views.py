@@ -8,31 +8,57 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.views.generic.edit import CreateView
-
+from .forms import UserRegistrationForm
 #Import your recommendation engine class (adjust path if needed)
 from .management.commands.recommendation import JobRecommendationEngine
 
 # Uncomment and import your forms if you have them:
 from .forms import UserProfileForm, JobSearchForm, JobRatingForm
 
+from django.shortcuts import render
+from .recommendation_engine import JobRecommendationEngine
+from .models import Job  # Adjust this import if your Job model is elsewhere
+
+
 @login_required
 def dashboard(request):
     engine = JobRecommendationEngine()
-    recs = engine.hybrid_recommendations(request.user.id, 6)
+    engine.build_user_item_matrix()
+    engine.build_content_features()
 
-    job_ids = [rec[0] for rec in recs]
-    jobs = Job.objects.filter(id__in=job_ids, is_active=True).select_related('company')
+    user = request.user
+    user_id = user.id
 
-    score_map = {rec[0]: rec[1] for rec in recs}
-    for job in jobs:
-        job.score = score_map[job.id]['hybrid_score']
+    # --- Hybrid Recommendations (Primary) ---
+    recs = engine.hybrid_recommendations(user_id, 6)
 
-    context = {
-        'featured_jobs': sorted(jobs, key=lambda x: x.score, reverse=True),
-        'total_jobs': Job.objects.filter(is_active=True).count(),
-        'total_companies': Company.objects.count(),
-    }
-    return render(request, 'dashboard.html', context)
+    # --- Fallback to Content-based ---
+    if not recs:
+        print("[DEBUG] Hybrid recommendations returned nothing. Falling back to content-based.")
+        recs = engine.content_based_recommendations(user_id, 6)
+
+    print("[DEBUG] Final Recommendations:", recs)
+
+    # --- Extract job IDs properly ---
+    job_ids = []
+    try:
+        for rec in recs:
+            if isinstance(rec, dict):  # content-based fallback returns dicts
+                job_ids.append(rec.get('job_id'))
+            elif isinstance(rec, (tuple, list)) and len(rec) >= 1:  # hybrid returns tuples
+                job_ids.append(rec[0])
+    except Exception as e:
+        print("[ERROR] Recommendation unpacking failed:", e)
+
+    # --- Fetch jobs from DB ---
+    jobs = Job.objects.filter(id__in=job_ids, is_active=True)
+
+    # Maintain order of recommendations
+    job_dict = {job.id: job for job in jobs}
+    ordered_jobs = [job_dict[job_id] for job_id in job_ids if job_id in job_dict]
+
+    # Pass as 'recommended_jobs' to template
+    return render(request, 'dashboard.html', {'recommended_jobs': ordered_jobs})
 
 @login_required
 def job_list(request):
@@ -270,7 +296,7 @@ class CustomLoginView(LoginView):
         return '/dashboard/'
 
 class RegisterView(CreateView):
-    form_class = UserCreationForm
+    form_class = UserRegistrationForm
     template_name = 'register.html'
     success_url = reverse_lazy('home')
 

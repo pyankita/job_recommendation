@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-%9slm7a(wyts@6s5n^mt#52^+8^0is16)4+ogp5g@^(x)*-r!a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'job_recom',
+    # 'job_recom.apps.JobRecomConfig',
 ]
 
 MIDDLEWARE = [
@@ -118,7 +119,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS=[
-    'static'
+    BASE_DIR /'static'
 ]
 
 # Default primary key field type
