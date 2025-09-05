@@ -129,12 +129,17 @@
     <!-- Security -->
     <div class="settings-section">
         <h3>Security</h3>
-
+    
         <div class="setting-row">
             <label><span class="icon">🔑</span> Change Password</label>
             <a href="{% url 'change_password' %}">Change</a>
         </div>
-
+        
+        <div class="setting-row">
+            <label><span class="icon">✏️</span> Edit Profile</label>
+            <a href="{% url 'edit_profile' %}">Edit</a>
+        </div>
+        
         <div class="setting-row">
             <label><span class="icon">🚪</span> Logout</label>
             <form method="post" action="{% url 'logout' %}">
@@ -142,7 +147,10 @@
                 <button type="submit" class="danger">Logout</button>
             </form>
         </div>
+    
+        
     </div>
+    
 
 </div>
 
