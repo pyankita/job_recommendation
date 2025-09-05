@@ -1,0 +1,164 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block title %}Settings - JobMatch{% endblock %}
+
+{% block content %}
+<style>
+    .settings-container {
+        max-width: 900px;
+        margin: 40px auto;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        font-family: Arial, sans-serif;
+    }
+
+    .settings-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 32px 24px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        transition: box-shadow 0.3s ease;
+    }
+
+    .settings-section:hover {
+        box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    }
+
+    .settings-section h3 {
+        margin-top: 0;
+        margin-bottom: 24px;
+        font-size: 1.6rem;
+        color: #2563eb;
+        font-weight: 600;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .setting-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 22px;
+    }
+
+    .setting-row label {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .setting-row input[type="checkbox"] {
+        transform: scale(1.3);
+        cursor: pointer;
+    }
+
+    .setting-row input[type="email"] {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid #bbb;
+        font-size: 1rem;
+        width: 60%;
+    }
+
+    .setting-row button, .setting-row a {
+        background: linear-gradient(90deg, #a4508b, #6a5094);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        font-weight: 600;
+        padding: 8px 20px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-left: 10px;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .setting-row button:hover, .setting-row a:hover {
+        background: linear-gradient(90deg, #6a5094, #a4508b);
+        transform: translateY(-2px);
+    }
+
+    .danger {
+        background: #ef4444 !important;
+    }
+
+    .danger:hover {
+        background: #b91c1c !important;
+        transform: translateY(-2px);
+    }
+
+    .icon {
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+
+    @media (max-width: 600px) {
+        .setting-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .setting-row input[type="email"] {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="settings-container">
+
+    <!-- Account Preferences -->
+    <div class="settings-section">
+        <h3>Account Preferences</h3>
+
+        <div class="setting-row">
+            <label for="themeToggle"><span class="icon">🌙</span> Dark Mode</label>
+            <input type="checkbox" id="themeToggle" {% if request.user.userprofile.dark_mode %}checked{% endif %}>
+        </div>
+
+        <div class="setting-row">
+            <label for="locationToggle"><span class="icon">📍</span> Allow Location</label>
+            <input type="checkbox" id="locationToggle" {% if request.user.userprofile.allow_location %}checked{% endif %}>
+        </div>
+ 
+    </div>
+
+    <!-- Security -->
+    <div class="settings-section">
+        <h3>Security</h3>
+
+        <div class="setting-row">
+            <label><span class="icon">🔑</span> Change Password</label>
+            <a href="{% url 'change_password' %}">Change</a>
+        </div>
+
+        <div class="setting-row">
+            <label><span class="icon">🚪</span> Logout</label>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="danger">Logout</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Dark mode toggle
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle?.addEventListener('change', function() {
+        document.body.classList.toggle('light-mode', !this.checked);
+        // Optional: send AJAX to save preference
+    });
+
+    // Location toggle
+    const locationToggle = document.getElementById('locationToggle');
+    locationToggle?.addEventListener('change', function() {
+        console.log('Location allowed:', this.checked);
+        // Optional: send AJAX to save preference
+    });
+</script>
+{% endblock %}

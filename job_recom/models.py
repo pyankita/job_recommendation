@@ -48,6 +48,7 @@ class Job(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,blank=True,null=True)
+    location = models.CharField(max_length=200, blank=True, null=True)
     skills = models.TextField(help_text="Comma-separated skills",blank=True,null=True)
     experience_years = models.IntegerField(default=0,blank=True,null=True)
     preferred_location = models.CharField(max_length=200,blank=True,null=True)

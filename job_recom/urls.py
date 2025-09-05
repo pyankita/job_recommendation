@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from .views import CustomPasswordChangeView
+
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -18,4 +20,7 @@ urlpatterns = [
     path('jobs/<int:job_id>/apply/', views.apply_job, name='apply_job'),
     path('saved-jobs/', views.saved_jobs, name='saved_jobs'),
     path("profile/edit/", views.edit_profile, name="edit_profile"),
+    path("settings/", views.settings, name="settings"),
+    path("change-password/", CustomPasswordChangeView.as_view(), name="change_password"),
+
 ]

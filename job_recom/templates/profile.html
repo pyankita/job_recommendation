@@ -11,14 +11,22 @@
         <p>Your account has been successfully created. Start exploring job opportunities tailored just for you.</p>
     </div>
 
+    <!-- Profile Header -->
     <div class="profile-header" style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
-        <div class="profile-avatar" id="userAvatar" style="width: 60px; height: 60px; background: #6a5094; border-radius: 50%; color: white; font-weight: bold; font-size: 30px; display: flex; align-items: center; justify-content: center;">U</div>
+        <div class="profile-avatar" style="width: 60px; height: 60px; background: #6a5094; border-radius: 50%; color: white; font-weight: bold; font-size: 30px; display: flex; align-items: center; justify-content: center;">
+            {{ request.user.first_name|default:"U"|slice:":1"|upper }}
+        </div>
         <div>
-            <div class="profile-name" id="userName" style="font-weight: 600; font-size: 1.3rem;">User</div>
-            <div class="profile-email" id="userEmail" style="color: #666;">user@example.com</div>
+            <div class="profile-name" style="font-weight: 600; font-size: 1.3rem;">
+                {{ request.user.first_name }} {{ request.user.last_name }}
+            </div>
+            <div class="profile-email" style="color: #666;">
+                {{ request.user.email }}
+            </div>
         </div>
     </div>
 
+    <!-- Profile Stats -->
     <div class="profile-stats" style="display: flex; gap: 30px; margin-bottom: 30px;">
         <div class="stat-item" style="text-align: center;">
             <span class="stat-number" style="font-weight: 700;">0</span>
@@ -38,72 +46,33 @@
         </div>
     </div>
 
+    <!-- Profile Sections -->
     <div class="profile-sections" style="display: flex; gap: 50px; flex-wrap: wrap;">
+        
+        <!-- Personal Info -->
         <div class="profile-section" style="flex: 1; min-width: 300px;">
             <div class="section-title" style="font-weight: 700; margin-bottom: 10px;">👤 Personal Information</div>
-            <div class="info-item"><strong>Full Name:</strong> <span id="fullName">-</span></div>
-            <div class="info-item"><strong>Email:</strong> <span id="displayEmail">-</span></div>
-            <div class="info-item"><strong>Phone:</strong> <span id="userPhone">-</span></div>
-            <div class="info-item"><strong>Location:</strong> <span id="userLocation">-</span></div>
-            <div class="info-item"><strong>Member Since:</strong> <span id="memberSince">-</span></div>
+            <div class="info-item"><strong>Full Name:</strong> {{ request.user.first_name }} {{ request.user.last_name }}</div>
+            <div class="info-item"><strong>Email:</strong> {{ request.user.email }}</div>
+            <div class="info-item"><strong>Location:</strong> {{ user_profile.location|default:"-" }}</div>
+            <div class="info-item"><strong>Skills:</strong> {{ user_profile.skills|default:"-" }}</div>
+            <div class="info-item"><strong>Experience:</strong> {{ user_profile.experience_years|default:"0" }} years</div>
+            <div class="info-item"><strong>Preferred Location:</strong> {{ user_profile.preferred_location|default:"-" }}</div>
+            <div class="info-item"><strong>Preferred Salary:</strong> {{ user_profile.preferred_salary_min|default:"-" }}</div>
+            <div class="info-item"><strong>Remote:</strong> {{ user_profile.preferred_remote|yesno:"Yes,No" }}</div>
+            <div class="info-item"><strong>Bio:</strong> {{ user_profile.bio|default:"-" }}</div>
+            <div class="info-item"><strong>Member Since:</strong> {{ request.user.date_joined|date:"F j, Y" }}</div>
         </div>
 
+        <!-- Account Settings -->
         <div class="profile-section" style="flex: 1; min-width: 300px;">
             <div class="section-title" style="font-weight: 700; margin-bottom: 10px;">⚙️ Account Settings</div>
             <div class="info-item"><strong>Account Status:</strong> <span style="color: #28a745;">Active</span></div>
             <div class="action-buttons" style="margin-top: 20px;">
                 <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
-                <a href="#" class="btn btn-outline-secondary">Change Password</a>
+                <a href="{% url 'change_password' %}" class="btn btn-outline-secondary">Change Password</a>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    // On page load, set theme from localStorage
-    window.onload = function() {
-        if (localStorage.getItem('theme') === 'light') {
-            document.body.classList.add('light-mode');
-        } else {
-            document.body.classList.remove('light-mode');
-        }
-    };
-
-    // Get user data from localStorage (set by register form or backend)
-    window.addEventListener('DOMContentLoaded', function() {
-        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-
-        if (userData.firstName) {
-            const firstName = userData.firstName;
-            const lastName = userData.lastName || '';
-            const fullName = `${firstName} ${lastName}`.trim();
-
-            document.getElementById('userName').textContent = firstName;
-            document.getElementById('userAvatar').textContent = firstName.charAt(0).toUpperCase();
-            document.getElementById('fullName').textContent = fullName;
-        }
-
-        if (userData.email) {
-            document.getElementById('userEmail').textContent = userData.email;
-            document.getElementById('displayEmail').textContent = userData.email;
-        }
-
-        if (userData.phone) {
-            document.getElementById('userPhone').textContent = userData.phone;
-        }
-
-        if (userData.location) {
-            document.getElementById('userLocation').textContent = userData.location;
-        }
-
-        const newsletterStatus = userData.newsletter ? 'Subscribed' : 'Not Subscribed';
-        const newsletterColor = userData.newsletter ? '#28a745' : '#6c757d';
-        document.getElementById('newsletterStatus').textContent = newsletterStatus;
-        document.getElementById('newsletterStatus').style.color = newsletterColor;
-
-        const today = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('memberSince').textContent = today.toLocaleDateString('en-US', options);
-    });
-</script>
 {% endblock %}

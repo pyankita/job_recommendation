@@ -10,6 +10,8 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.views.generic.edit import CreateView
 from .forms import UserRegistrationForm
 from .models import UserProfile 
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib import messages
 #Import your recommendation engine class (adjust path if needed)
 from .management.commands.recommendation import JobRecommendationEngine
 
@@ -244,21 +246,28 @@ def profile(request):
 
 @login_required
 def edit_profile(request):
-    profile, created = UserProfileProfile.objects.get_or_create(user=request.user)
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
+        # Update User basic info
         request.user.first_name = request.POST.get("first_name")
         request.user.last_name = request.POST.get("last_name")
         request.user.save()
 
-        profile.phone = request.POST.get("phone")
+        # Update UserProfile info
         profile.location = request.POST.get("location")
-        profile.newsletter = request.POST.get("newsletter") == "True"
+        profile.skills = request.POST.get("skills")
+        profile.experience_years = request.POST.get("experience_years") or 0
+        profile.preferred_location = request.POST.get("preferred_location")
+        profile.preferred_salary_min = request.POST.get("preferred_salary_min") or None
+        profile.preferred_remote = request.POST.get("preferred_remote") == "True"
+        profile.bio = request.POST.get("bio")
         profile.save()
 
-        return redirect("profile")  # Redirect back to profile page
+        return redirect("profile")
 
     return render(request, "edit_profile.html", {"profile": profile})
+
 
 
 @login_required
@@ -325,6 +334,32 @@ class RegisterView(CreateView):
 class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('home')
 
+class CustomPasswordChangeView(PasswordChangeView):
+    template_name = "change_password.html"
+    success_url = reverse_lazy("profile")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Your password has been successfully updated.")
+        return super().form_valid(form)
+    
+@login_required
+def settings(request):
+    """User account settings"""
+    try:
+        profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        profile = None
+
+    if request.method == "POST":
+        profile.dark_mode = request.POST.get("dark_mode") == "on"
+        profile.allow_location = request.POST.get("allow_location") == "on"
+        profile.save()
+        messages.success(request, "Settings updated successfully!")
+        return redirect("settings")
+
+    return render(request, "settings.html", {"profile": profile})
+
+    
 def about(request):
     return render(request, 'about.html')
 def home(request):
