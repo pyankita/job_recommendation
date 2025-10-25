@@ -60,8 +60,20 @@ def dashboard(request):
     job_dict = {job.id: job for job in jobs}
     ordered_jobs = [job_dict[job_id] for job_id in job_ids if job_id in job_dict]
 
-    # Pass as 'recommended_jobs' to template
-    return render(request, 'dashboard.html', {'recommended_jobs': ordered_jobs})
+    # --- Add is_saved flag for each job ---
+    for job in ordered_jobs:
+        job.is_saved = False
+        if request.user.is_authenticated:
+            job.is_saved = job.jobinteraction_set.filter(
+                user=request.user,
+                interaction_type='save'
+            ).exists()
+
+    # --- Render template ---
+    context = {
+        'recommended_jobs': ordered_jobs,
+    }
+    return render(request, 'dashboard.html', context)
 
 @login_required
 def job_list(request):
