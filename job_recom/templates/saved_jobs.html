@@ -55,21 +55,35 @@
         color: #2563eb; /* blue-600 */
         font-weight: 600;
     }
-    .remove-form {
-        margin: 0;
+    .job-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
-    .remove-btn {
-        background-color: #ef4444; /* red-500 */
-        color: white;
-        border: none;
+    .action-btn {
         padding: 8px 14px;
         border-radius: 6px;
         font-weight: 600;
         cursor: pointer;
+        border: none;
+        text-align: center;
         transition: background-color 0.3s ease;
+    }
+    .remove-btn {
+        background-color: #ef4444; /* red-500 */
+        color: white;
     }
     .remove-btn:hover {
         background-color: #b91c1c; /* red-700 */
+    }
+    .detail-btn {
+        background-color: #2563eb; /* blue-600 */
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .detail-btn:hover {
+        background-color: #1d4ed8; /* blue-800 */
     }
 </style>
 
@@ -85,10 +99,15 @@
                     </div>
                     <div class="job-salary">{{ interaction.job.salary_range }}</div>
                 </div>
-                <form method="post" action="{% url 'save_job' interaction.job.id %}" class="remove-form">
-                    {% csrf_token %}
-                    <button type="submit" class="remove-btn" title="Remove this job">Remove</button>
-                </form>
+
+                <div class="job-actions">
+                    <a href="{% url 'job_detail' interaction.job.id %}" class="action-btn detail-btn">Detail</a>
+
+                    <form method="post" action="{% url 'save_job' interaction.job.id %}" class="remove-form">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn remove-btn" title="Remove this job">Remove</button>
+                    </form>
+                </div>
             </div>
         {% endfor %}
     {% else %}
