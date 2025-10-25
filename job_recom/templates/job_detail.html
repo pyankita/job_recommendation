@@ -1,0 +1,89 @@
+{% extends 'base2.html' %}
+{% load static %}
+
+{% block content %}
+<div class="main-content" style="padding: 20px; max-width: 900px; margin: auto;">
+    <a href="{% url 'dashboard' %}" style="text-decoration:none; color:#2563eb;">&larr; Back to Dashboard</a>
+
+    <div class="job-detail" style="margin-top: 20px; background: #fff; padding: 24px; border-radius: 10px; border: 1px solid #e5e7eb;">
+        <!-- Job Title -->
+        <h1 style="font-size: 1.8rem; font-weight: bold; margin-bottom: 10px;">{{ job.title }}</h1>
+        <!-- Company & Location -->
+        <p style="color: #555; margin-bottom: 15px;">
+            <strong>{{ job.company.name }}</strong> &bull; {{ job.location }}
+        </p>
+        <!-- Job Description -->
+        <div style="margin-bottom: 15px;">
+            <h3 style="font-weight:bold;">Job Description</h3>
+            <p>{{ job.description }}</p>
+        </div>
+
+        <!-- Required Skills -->
+        {% if skills_list %}
+        <div style="margin-bottom: 15px;">
+            <h3 style="font-weight:bold;">Required Skills</h3>
+            <ul>
+                {% for skill in skills_list %}
+                    <li>{{ skill }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Salary -->
+        <p style="font-weight:bold; color: #2563eb; margin-bottom: 15px;">Salary: {{ job.salary }}</p>
+
+        <!-- Save / Apply / Rate -->
+        <div style="display:flex; gap: 10px; margin-bottom: 20px;">
+            <!-- Save Job -->
+            <form method="POST" action="{% url 'save_job' job.id %}">
+                {% csrf_token %}
+                <button type="submit" style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; cursor:pointer;">
+                    {% if job.jobinteraction_set.filter(user=user, interaction_type='save').exists %}
+                        Saved
+                    {% else %}
+                        Save
+                    {% endif %}
+                </button>
+            </form>
+
+            <!-- Apply Job -->
+            <form method="POST" action="{% url 'apply_job' job.id %}">
+                {% csrf_token %}
+                <button type="submit" style="background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; cursor:pointer;">
+                    Apply
+                </button>
+            </form>
+
+            <!-- Rate Job -->
+            <form method="POST" action="">
+                {% csrf_token %}
+                {{ form.rating }}
+                <button type="submit" style="background: #34d399; color: #fff; border: none; border-radius: 6px; padding: 5px 18px; cursor:pointer;">
+                    Rate
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Similar Jobs Section -->
+    <div class="similar-jobs" style="margin-top: 30px;">
+        <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 15px;">Similar Jobs</h2>
+        {% if similar_jobs %}
+            <div style="display:flex; gap: 15px; flex-wrap: wrap;">
+                {% for sim_job in similar_jobs %}
+                <div style="background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px; padding:15px; min-width:260px; max-width:280px;">
+                    <a href="{% url 'job_detail' sim_job.id %}" style="text-decoration:none; color:#111;">
+                        <strong>{{ sim_job.title }}</strong>
+                    </a>
+                    <p style="color:#555; margin:5px 0;">{{ sim_job.company.name }} &bull; {{ sim_job.location }}</p>
+                    <p style="color:#2563eb; font-weight:bold;">{{ sim_job.salary }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No similar jobs found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
