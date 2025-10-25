@@ -14,6 +14,10 @@ from django.contrib.auth.views import PasswordChangeView
 from django.contrib import messages
 #Import your recommendation engine class (adjust path if needed)
 from .management.commands.recommendation import JobRecommendationEngine
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.shortcuts import get_object_or_404
+
 
 # Uncomment and import your forms if you have them:
 from .forms import UserProfileForm, JobSearchForm, JobRatingForm
@@ -393,3 +397,25 @@ def home(request):
 
 def job(request):
     return render(request, 'browse_jobs.html')
+
+
+@login_required
+@csrf_exempt
+def save_job_ajax(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        job_id = data.get("job_id")
+        job = get_object_or_404(Job, id=job_id, is_active=True)
+
+        interaction, created = JobInteraction.objects.get_or_create(
+            user=request.user,
+            job=job,
+            interaction_type='save'
+        )
+
+        if not created:
+            interaction.delete()
+            return JsonResponse({"status": "unsaved"})
+        return JsonResponse({"status": "saved"})
+
+    return JsonResponse({"error": "Invalid request"}, status=400)

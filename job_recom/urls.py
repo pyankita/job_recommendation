@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
-from .views import CustomPasswordChangeView
+from .views import CustomPasswordChangeView,save_job_ajax
 
 
 urlpatterns = [
@@ -22,5 +22,6 @@ urlpatterns = [
     path("profile/edit/", views.edit_profile, name="edit_profile"),
     path("settings/", views.settings, name="settings"),
     path("change-password/", CustomPasswordChangeView.as_view(), name="change_password"),
+    path('save-job-ajax/', save_job_ajax, name='save_job_ajax'),
 
 ]
