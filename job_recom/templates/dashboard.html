@@ -23,7 +23,7 @@
             {% for job in recommended_jobs %}
             <div class="job-card" style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px; min-width: 340px; max-width: 370px; flex: 1 1 340px; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                 <div class="job-card-title" style="font-size: 1.1rem; margin-bottom: 4px;">
-                    <a href="{% url 'job_detail' job.id %}" style="text-decoration:none; color: inherit;">
+                    <a href="{% url 'job_detail' job.id %}" style="text-decoration:none; color: #111;">
                         <strong>{{ job.title }}</strong>
                     </a>
                 </div>
