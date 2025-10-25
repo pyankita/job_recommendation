@@ -17,6 +17,7 @@ from .management.commands.recommendation import JobRecommendationEngine
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 
 
 # Uncomment and import your forms if you have them:
