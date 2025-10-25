@@ -118,9 +118,10 @@ def job_list(request):
 
 @login_required
 def job_detail(request, job_id):
-    """Job detail page with interaction tracking"""
+    """Job detail page with interaction tracking, rating, and saved/applied status"""
     job = get_object_or_404(Job, id=job_id, is_active=True)
 
+    # Track that user viewed this job
     if request.user.is_authenticated:
         JobInteraction.objects.get_or_create(
             user=request.user,
@@ -128,25 +129,32 @@ def job_detail(request, job_id):
             interaction_type='view'
         )
 
+    # Check if user has saved this job
+    job.is_saved = False
+    if request.user.is_authenticated:
+        job.is_saved = job.jobinteraction_set.filter(
+            user=request.user,
+            interaction_type='save'
+        ).exists()
+
+    # Check if user has applied to this job
+    job.is_applied = False
+    if request.user.is_authenticated:
+        job.is_applied = job.jobinteraction_set.filter(
+            user=request.user,
+            interaction_type='apply'
+        ).exists()
+
+    # Get user's previous rating if any
+    user_rating = None
+    if request.user.is_authenticated:
         user_rating = JobInteraction.objects.filter(
             user=request.user,
             job=job,
             rating__isnull=False
         ).first()
 
-        engine = JobRecommendationEngine()
-        similar_jobs_data = engine.content_based_recommendations(request.user.id, 5)
-        similar_job_ids = [rec['job_id'] for rec in similar_jobs_data]
-        similar_jobs = Job.objects.filter(id__in=similar_job_ids, is_active=True).select_related('company')
-
-    else:
-        user_rating = None
-        similar_jobs = Job.objects.filter(
-            company=job.company,
-            is_active=True
-        ).exclude(id=job.id)[:3]
-
-    # Handle rating form submission (make sure JobRatingForm is imported)
+    # Handle rating form submission
     if request.method == 'POST' and request.user.is_authenticated:
         form = JobRatingForm(request.POST)
         if form.is_valid():
@@ -165,6 +173,12 @@ def job_detail(request, job_id):
             return redirect('job_detail', job_id=job.id)
     else:
         form = JobRatingForm(initial={'rating': user_rating.rating if user_rating else None})
+
+    # Fetch similar jobs
+    engine = JobRecommendationEngine()
+    similar_jobs_data = engine.content_based_recommendations(request.user.id, 5)
+    similar_job_ids = [rec['job_id'] for rec in similar_jobs_data]
+    similar_jobs = Job.objects.filter(id__in=similar_job_ids, is_active=True).select_related('company')
 
     context = {
         'job': job,
