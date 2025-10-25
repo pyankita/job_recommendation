@@ -12,6 +12,7 @@
         flex-direction: column;
         gap: 20px;
     }
+
     .saved-job {
         display: flex;
         justify-content: space-between;
@@ -21,18 +22,19 @@
         border-radius: 8px;
         background-color: #fff;
         box-shadow: 0 2px 8px rgb(0 0 0 / 0.05);
-        transition: box-shadow 0.3s ease;
+        transition: box-shadow 0.3s ease, transform 0.2s ease;
     }
+
     .saved-job:hover {
         box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+        transform: translateY(-2px);
     }
+
     .saved-job-info {
         flex: 1;
         margin-right: 20px;
     }
-    .saved-job-info > div {
-        margin-bottom: 6px;
-    }
+
     .job-title {
         font-size: 1.25rem;
         font-weight: 600;
@@ -40,50 +42,71 @@
         cursor: pointer;
         text-decoration: underline;
     }
+
     .job-company {
         color: #444;
         font-weight: 500;
+        margin: 4px 0;
     }
+
     .job-desc {
         color: #555;
         font-size: 0.9rem;
         max-height: 48px;
         overflow: hidden;
         text-overflow: ellipsis;
+        margin-bottom: 6px;
     }
+
     .job-salary {
         color: #2563eb; /* blue-600 */
         font-weight: 600;
+        margin-bottom: 6px;
     }
+
     .job-actions {
         display: flex;
-        flex-direction: column;
-        gap: 8px;
+        gap: 10px;
     }
+
     .action-btn {
-        padding: 8px 14px;
+        padding: 8px 16px;
         border-radius: 6px;
         font-weight: 600;
         cursor: pointer;
         border: none;
         text-align: center;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease, transform 0.2s ease;
     }
-    .remove-btn {
-        background-color: #ef4444; /* red-500 */
-        color: white;
+
+    .action-btn:hover {
+        transform: translateY(-1px);
     }
-    .remove-btn:hover {
-        background-color: #b91c1c; /* red-700 */
-    }
+
     .detail-btn {
         background-color: #2563eb; /* blue-600 */
         color: white;
         text-decoration: none;
-        display: inline-block;
     }
+
     .detail-btn:hover {
         background-color: #1d4ed8; /* blue-800 */
+    }
+
+    .remove-btn {
+        background-color: #ef4444; /* red-500 */
+        color: white;
+    }
+
+    .remove-btn:hover {
+        background-color: #b91c1c; /* red-700 */
+    }
+
+    .no-jobs {
+        text-align: center;
+        color: #888;
+        font-size: 1.2rem;
+        margin-top: 40px;
     }
 </style>
 
@@ -94,15 +117,12 @@
                 <div class="saved-job-info">
                     <a href="{% url 'job_detail' interaction.job.id %}" class="job-title">{{ interaction.job.title }}</a>
                     <div class="job-company">{{ interaction.job.company.name }}</div>
-                    <div class="job-desc">
-                        {{ interaction.job.description|truncatechars:100 }}
-                    </div>
+                    <div class="job-desc">{{ interaction.job.description|truncatechars:100 }}</div>
                     <div class="job-salary">{{ interaction.job.salary_range }}</div>
                 </div>
 
                 <div class="job-actions">
                     <a href="{% url 'job_detail' interaction.job.id %}" class="action-btn detail-btn">Detail</a>
-
                     <form method="post" action="{% url 'save_job' interaction.job.id %}" class="remove-form">
                         {% csrf_token %}
                         <button type="submit" class="action-btn remove-btn" title="Remove this job">Remove</button>
@@ -111,7 +131,7 @@
             </div>
         {% endfor %}
     {% else %}
-        <div style="text-align:center; color:#888; font-size:1.2rem; margin-top:40px;">
+        <div class="no-jobs">
             You have no saved jobs yet.
         </div>
     {% endif %}
