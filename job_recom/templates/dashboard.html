@@ -44,17 +44,14 @@
 
                     <div class="job-card-actions" style="display: flex; gap: 10px; margin-top: auto;">
                         <!-- Save/Unsave Button -->
-                        <form method="POST" action="{% url 'save_job' job.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="save-btn" 
-                                    style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer;">
-                                {% if job.is_saved %}
-                                    Saved
-                                {% else %}
-                                    Save
-                                {% endif %}
-                            </button>
-                        </form>
+                        <button type="button" class="save-btn" data-job-id="{{ job.id }}" 
+                                style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 5px 18px; font-size: 1rem; cursor: pointer;">
+                            {% if job.is_saved %}
+                                Saved
+                            {% else %}
+                                Save
+                            {% endif %}
+                        </button>
 
                         <!-- Apply Button -->
                         <form method="POST" action="{% url 'apply_job' job.id %}">
@@ -72,4 +69,35 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const saveButtons = document.querySelectorAll(".save-btn");
+
+    saveButtons.forEach(btn => {
+        btn.addEventListener("click", function() {
+            const jobId = this.dataset.jobId;
+            const csrftoken = '{{ csrf_token }}';
+
+            fetch("{% url 'save_job_ajax' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrftoken
+                },
+                body: JSON.stringify({ job_id: jobId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "saved") {
+                    btn.textContent = "Saved";
+                } else if (data.status === "unsaved") {
+                    btn.textContent = "Save";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    });
+});
+</script>
 {% endblock %}
