@@ -42,16 +42,17 @@
                         Salary: ${{ job.salary }}
                     </div>
 
-                    {% if job.requirements %}
+                    {% if job.requirements_list %}
                     <div style="background: #eff6ff; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
                         <strong style="color: #1e3a8a;">Requirements:</strong>
                         <ul style="margin: 6px 0 0 20px; color: #1e293b; font-size: 0.92rem;">
-                            {% for req in job.requirements.split(',') %}
-                                <li>{{ req|trim }}</li>
+                            {% for req in job.requirements_list %}
+                                <li>{{ req }}</li>
                             {% endfor %}
                         </ul>
                     </div>
                     {% endif %}
+
 
                     <div style="display: flex; gap: 10px; margin-top: auto;">
                         <button type="button" class="save-btn" data-job-id="{{ job.id }}" 
