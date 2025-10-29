@@ -4,22 +4,32 @@
 {% block content %}
 <div class="job-detail-container" style="max-width:900px; margin:40px auto; padding:20px;">
 
-    <!-- Job Header -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-        <div>
-            <h1 style="font-size:2rem; font-weight:bold; margin-bottom:8px; color:#1e40af;">{{ job.title }}</h1>
-            <p style="color:#555; font-size:1rem;">
-                {{ job.company.name }} &bull; {{ job.location }}
-            </p>
-        </div>
-        <p style="font-weight:bold; color:#2563eb; font-size:1.1rem;">Salary: {{ job.salary }}</p>
+    <!-- Job Title -->
+    <h1 style="font-size:2rem; font-weight:bold; color:#1e40af; margin-bottom:10px;">{{ job.title }}</h1>
+
+    <!-- Basic Job Info -->
+    <div style="margin-bottom:20px; line-height:1.6;">
+        <p><strong>Company:</strong> {{ job.company.name }}</p>
+        <p><strong>Location:</strong> {{ job.location }}</p>
+        <p><strong>Category:</strong> {{ job.category }}</p>
+        <p><strong>Created Date:</strong> {{ job.created_date }}</p>
+        <p><strong>Deadline:</strong> {{ job.deadline }}</p>
+        <p><strong>Salary:</strong> 
+            {% if job.salary %}
+                ${{ job.salary|floatformat:2 }}
+            {% else %}
+                Not specified
+            {% endif %}
+        </p>
+        <p><strong>Education Level:</strong> {{ job.education_level }}</p>
+        <p><strong>Contact Email:</strong> {{ job.contact_email }}</p>
     </div>
 
     <!-- Skills -->
-    {% if skills_list %}
+    {% if job.required_skills %}
         <div style="margin-bottom:20px;">
-            <strong>Skills Required:</strong>
-            {% for skill in skills_list %}
+            <h3 style="font-size:1.2rem; font-weight:bold; color:#1e3a8a; margin-bottom:10px;">Required Skills</h3>
+            {% for skill in job.required_skills_list %}
                 <span style="display:inline-block; background:#f0f0f0; color:#111; padding:5px 10px; border-radius:5px; margin:4px 4px 4px 0; font-size:0.9rem;">
                     {{ skill }}
                 </span>
@@ -28,13 +38,31 @@
     {% endif %}
 
     <!-- Job Description -->
-    <div style="margin-bottom:25px; background:#f8fafc; padding:20px; border-radius:10px; border:1px solid #e5e7eb; box-shadow:0 2px 6px rgba(0,0,0,0.05);">
-        <h3 style="font-size:1.3rem; font-weight:bold; margin-bottom:12px; color:#1e3a8a;">Job Description</h3>
-        <p style="line-height:1.6; color:#333;">{{ job.description }}</p>
+    {% if job.description %}
+    <div style="margin-bottom:20px; background:#f8fafc; padding:20px; border-radius:10px; border:1px solid #e5e7eb;">
+        <h3 style="font-size:1.3rem; font-weight:bold; color:#1e3a8a;">Job Description</h3>
+        <p style="color:#333; line-height:1.6;">{{ job.description }}</p>
     </div>
+    {% endif %}
+
+    <!-- Requirements -->
+    {% if job.requirements %}
+    <div style="margin-bottom:20px; background:#f9fafb; padding:20px; border-radius:10px; border:1px solid #e5e7eb;">
+        <h3 style="font-size:1.2rem; font-weight:bold; color:#1e3a8a;">Requirements</h3>
+        <p style="color:#333; line-height:1.6;">{{ job.requirements }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Responsibilities -->
+    {% if job.responsibilities %}
+    <div style="margin-bottom:30px; background:#f9fafb; padding:20px; border-radius:10px; border:1px solid #e5e7eb;">
+        <h3 style="font-size:1.2rem; font-weight:bold; color:#1e3a8a;">Responsibilities</h3>
+        <p style="color:#333; line-height:1.6;">{{ job.responsibilities }}</p>
+    </div>
+    {% endif %}
 
     <!-- Action Buttons -->
-    <div style="display:flex; gap:15px; margin-bottom:30px;">
+    <div style="display:flex; gap:15px; align-items:center;">
         <!-- Save Job -->
         <form method="POST" action="{% url 'save_job' job.id %}">
             {% csrf_token %}
