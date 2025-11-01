@@ -10,9 +10,6 @@ from django.contrib.auth.models import User
 from .models import Job, UserProfile, JobInteraction
 
 
-# ================================================================
-# DISPLAY FUNCTION — VIEWING USER + JOB RECOMMENDATION DETAILS
-# ================================================================
 def display_recommendation_details(user_id, engine, recommendation_type="content"):
     """
     Displays recommendation details such as:
@@ -51,7 +48,7 @@ def display_recommendation_details(user_id, engine, recommendation_type="content
     else:
         recommendations = engine.hybrid_recommendations(user_id, num_recommendations=5)
 
-    # --- PRINT JOB DETAILS ---
+    #PRINT JOB DETAILS 
     for idx, rec in enumerate(recommendations, start=1):
         job = Job.objects.get(id=rec['job_id']) if isinstance(rec, dict) else Job.objects.get(id=rec[0])
         job_vector = engine.tfidf_vectorizer.transform([
@@ -74,9 +71,6 @@ def display_recommendation_details(user_id, engine, recommendation_type="content
     print("\n===================================================\n")
 
 
-# ================================================================
-# JOB RECOMMENDATION ENGINE CLASS
-# ================================================================
 class JobRecommendationEngine:
     """
     Job Recommendation Engine using three approaches:
