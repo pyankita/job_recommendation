@@ -95,18 +95,14 @@ class JobRecommendationEngine:
         self.job_ids = None
         self.user_job_ratings = None
 
-    # ------------------------------------------------------------
-    # TEXT PREPROCESSING
-    # ------------------------------------------------------------
+ 
     def preprocess_text(self, text):
         """Cleans text by removing special characters and converting to lowercase."""
         if not text:
             return ""
         return re.sub(r'[^a-zA-Z\s]', '', str(text).lower())
 
-    # ------------------------------------------------------------
-    # JOB FEATURE EXTRACTION
-    # ------------------------------------------------------------
+
     def extract_job_features(self, job):
         """Extracts combined text features from a job record."""
         features = [
@@ -127,7 +123,6 @@ class JobRecommendationEngine:
             if hasattr(job.company, 'industry'):
                 features.append(self.preprocess_text(job.company.industry))
 
-        # Optional: add job type or experience level if available
         if hasattr(job, 'experience_level'):
             features.append(str(job.experience_level))
         if hasattr(job, 'job_type'):
@@ -137,9 +132,6 @@ class JobRecommendationEngine:
 
         return ' '.join(features)
 
-    # ------------------------------------------------------------
-    # CONTENT-BASED FILTERING
-    # ------------------------------------------------------------
     def build_content_features(self):
         """Builds TF-IDF matrix for all active jobs."""
         jobs = Job.objects.filter(is_active=True).select_related('company')
@@ -199,9 +191,6 @@ class JobRecommendationEngine:
         recommendations.sort(key=lambda x: x['similarity_score'], reverse=True)
         return recommendations[:num_recommendations]
 
-    # ------------------------------------------------------------
-    # COLLABORATIVE FILTERING
-    # ------------------------------------------------------------
     def build_user_item_matrix(self):
         """Builds user-item matrix from JobInteraction ratings."""
         interactions = JobInteraction.objects.filter(rating__isnull=False).values('user_id', 'job_id', 'rating')
@@ -283,9 +272,6 @@ class JobRecommendationEngine:
         recommendations.sort(key=lambda x: x['predicted_rating'], reverse=True)
         return recommendations[:num_recommendations]
 
-    # ------------------------------------------------------------
-    # HYBRID RECOMMENDATION
-    # ------------------------------------------------------------
     def hybrid_recommendations(self, user_id, num_recommendations=5):
         """
         Combines content-based and collaborative approaches:
