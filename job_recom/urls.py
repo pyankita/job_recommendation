@@ -23,5 +23,7 @@ urlpatterns = [
     path("settings/", views.settings, name="settings"),
     path("change-password/", CustomPasswordChangeView.as_view(), name="change_password"),
     path('save-job-ajax/', save_job_ajax, name='save_job_ajax'),
+    path('rate-job/', views.rate_job_ajax, name='rate_job_ajax'),
+
 
 ]

@@ -82,3 +82,18 @@ class JobInteraction(models.Model):
     
     def __str__(self):
         return f"{self.user.username} {self.interaction_type} {self.job.title}"
+
+
+
+
+class JobRating(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    rating = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'job')  # ensures one rating per user per job
+
+    def __str__(self):
+        return f"{self.user.username} rated {self.job.title}: {self.rating}"

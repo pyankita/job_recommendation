@@ -1,5 +1,5 @@
 {% extends 'base2.html' %}
-{% load static %}
+{% load static tz %}
 
 {% block content %}
 <div class="d-flex justify-content-center align-items-start" style="min-height: 80vh; padding-top: 40px; padding-bottom: 40px;">
@@ -16,20 +16,13 @@
                 <input type="text" name="location" class="form-control" placeholder="Location" value="{{ request.GET.location }}">
             </div>
             <div class="col-md-2">
-                <select name="job_type" class="form-select">
-                    <option value="">All Job Types</option>
-                    <option value="full-time" {% if request.GET.job_type == 'full-time' %}selected{% endif %}>Full-time</option>
-                    <option value="part-time" {% if request.GET.job_type == 'part-time' %}selected{% endif %}>Part-time</option>
-                    <option value="contract" {% if request.GET.job_type == 'contract' %}selected{% endif %}>Contract</option>
-                    <option value="internship" {% if request.GET.job_type == 'internship' %}selected{% endif %}>Internship</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <select name="experience_level" class="form-select">
-                    <option value="">Experience Level</option>
-                    <option value="entry" {% if request.GET.experience_level == 'entry' %}selected{% endif %}>Entry</option>
-                    <option value="mid" {% if request.GET.experience_level == 'mid' %}selected{% endif %}>Mid</option>
-                    <option value="senior" {% if request.GET.experience_level == 'senior' %}selected{% endif %}>Senior</option>
+                <select name="salary_range" class="form-select">
+                    <option value="">Salary Range</option>
+                    <option value="0-10000" {% if request.GET.salary_range == '0-10000' %}selected{% endif %}>$0 - $10,000</option>
+                    <option value="10001-30000" {% if request.GET.salary_range == '10001-30000' %}selected{% endif %}>$10,001 - $30,000</option>
+                    <option value="30001-50000" {% if request.GET.salary_range == '30001-50000' %}selected{% endif %}>$30,001 - $50,000</option>
+                    <option value="50001-100000" {% if request.GET.salary_range == '50001-100000' %}selected{% endif %}>$50,001 - $100,000</option>
+                    <option value="100001" {% if request.GET.salary_range == '100001' %}selected{% endif %}>$100,000+</option>
                 </select>
             </div>
             <div class="col-md-1 d-grid">
@@ -47,17 +40,47 @@
                     <div class="list-group-item mb-3 p-3 border rounded shadow-sm">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <h5 class="mb-1"><a href="{% url 'job_detail' job.id %}" class="text-decoration-none">{{ job.title }}</a></h5>
-                                <small class="text-muted">{{ job.company.name }} • {{ job.location }}</small><br>
-                                <small class="text-muted">Experience: {{ job.experience_level|capfirst }}</small>
+                                <h5 class="mb-1">
+                                    <a href="{% url 'job_detail' job.id %}" class="text-decoration-none">{{ job.title }}</a>
+                                </h5>
+                                <small class="text-muted">{{ job.company.name }} • {{ job.location }}</small>
                             </div>
                             <div class="text-end">
-                                <div class="mb-2"><strong>{{ job.salary|default:"NPR Not specified" }}</strong></div>
-                                <a href="{% url 'apply_job' job.id %}" class="btn btn-success btn-sm mb-1">Apply</a>
-                                <a href="{% url 'save_job' job.id %}" class="btn btn-outline-primary btn-sm">Save</a>
+                                <div class="mb-2"><strong>${{ job.salary|default:"N/A" }}</strong></div>
                             </div>
                         </div>
-                        <p class="mt-2 mb-0">{{ job.description|truncatechars:150 }}</p>
+
+                        <p class="mt-2 mb-2">{{ job.description|truncatechars:150 }}</p>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-end align-items-center mt-2 gap-2">
+                            {% now "Y-m-d" as today_date %}
+                            {% if job.deadline and job.deadline < today_date %}
+                                <button type="button" class="btn btn-danger" disabled>Expired</button>
+                            {% else %}
+                                <form method="POST" action="{% url 'apply_job' job.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">
+                                        {% if job.is_applied %}
+                                            Applied
+                                        {% else %}
+                                            Apply
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                            <form method="POST" action="{% url 'save_job' job.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-primary">
+                                    {% if job.is_saved %}
+                                        Saved
+                                    {% else %}
+                                        Save
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 {% endfor %}
             </div>

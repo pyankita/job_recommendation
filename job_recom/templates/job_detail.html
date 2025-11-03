@@ -91,15 +91,55 @@
             </button>
         </form>
 
-        <!-- Rating Form -->
-        <form method="POST" style="display:flex; align-items:center;">
-            {% csrf_token %}
-            {{ form.rating }}
-            <button type="submit" style="background:#34d399; color:#fff; border:none; border-radius:6px; padding:8px 14px; font-weight:bold; cursor:pointer; margin-left:8px;">
-                Rate
+        <!-- Rate Job -->
+        <div style="display:flex; align-items:center;">
+            <input type="number" id="rating-input" name="rating" min="1" max="5" 
+                value="{{ user_rating|default:0 }}" 
+                style="width:60px; padding:6px; border-radius:5px; border:1px solid #ccc; font-size:0.9rem;">
+            <button id="rate-btn" data-job-id="{{ job.id }}" 
+                style="background:{% if job.is_rated %}#f59e0b{% else %}#34d399{% endif %}; 
+                    color:#fff; border:none; border-radius:6px; padding:8px 14px; font-weight:bold; cursor:pointer; margin-left:8px;">
+                {% if job.is_rated %}Rated{% else %}Rate{% endif %}
             </button>
-        </form>
+        </div>
+
     </div>
 
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const rateBtn = document.getElementById("rate-btn");
+        const ratingInput = document.getElementById("rating-input");
+        const csrftoken = '{{ csrf_token }}';
+    
+        rateBtn.addEventListener("click", function() {
+            const jobId = this.dataset.jobId;
+            const rating = ratingInput.value;
+    
+            fetch("{% url 'rate_job_ajax' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrftoken
+                },
+                body: JSON.stringify({ job_id: jobId, rating: rating })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === "rated"){
+                    rateBtn.textContent = "Rated";
+                    rateBtn.style.background = "#f59e0b";
+                } else if(data.status === "unrated"){
+                    rateBtn.textContent = "Rate";
+                    rateBtn.style.background = "#34d399";
+                } else if(data.status === "error"){
+                    alert(data.message);
+                }
+            })
+            .catch(err => console.error("Error:", err));
+        });
+    });
+    </script>
+    
 {% endblock %}

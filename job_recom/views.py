@@ -18,6 +18,8 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from .models import Job, JobRating
+
 
 
 # Uncomment and import your forms if you have them:
@@ -396,9 +398,53 @@ def about(request):
 def home(request):
     return render(request, 'home.html')
 
-def job(request):
-    return render(request, 'browse_jobs.html')
 
+def job(request):
+    search_query = request.GET.get('search_query', '')
+    location = request.GET.get('location', '')
+    salary_range = request.GET.get('salary_range', '')
+
+    jobs = Job.objects.filter(is_active=True)
+
+    # Search filter
+    if search_query:
+        jobs = jobs.filter(
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(company__name__icontains=search_query) |
+            Q(required_skills__icontains=search_query)
+        )
+
+    # Location filter
+    if location:
+        jobs = jobs.filter(location__icontains=location)
+
+    # Salary range filter
+    if salary_range:
+        parts = salary_range.split('-')
+        try:
+            if len(parts) == 2:
+                min_salary = float(parts[0])
+                max_salary = float(parts[1])
+                jobs = jobs.filter(salary__gte=min_salary, salary__lte=max_salary)
+            elif len(parts) == 1:
+                min_salary = float(parts[0])
+                jobs = jobs.filter(salary__gte=min_salary)
+        except ValueError:
+            pass
+
+    paginator = Paginator(jobs, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'location': location,
+        'salary_range': salary_range,
+    }
+
+    return render(request, 'browse_jobs.html', context)
 
 @login_required
 @csrf_exempt
@@ -420,3 +466,28 @@ def save_job_ajax(request):
         return JsonResponse({"status": "saved"})
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+
+@csrf_exempt
+def rate_job_ajax(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        job_id = data.get("job_id")
+        rating_value = data.get("rating")
+        user = request.user
+
+        if not user.is_authenticated:
+            return JsonResponse({"status": "error", "message": "Login required"})
+
+        try:
+            job = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Job not found"})
+
+        # Save or update rating
+        rating_obj, created = JobRating.objects.get_or_create(user=user, job=job)
+        rating_obj.rating = rating_value
+        rating_obj.save()
+
+        return JsonResponse({"status": "rated"})
