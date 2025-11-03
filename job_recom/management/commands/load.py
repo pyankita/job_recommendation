@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
         # Delete all previous jobs before loading new ones
         Job.objects.all().delete()
-        self.stdout.write(self.style.WARNING("🗑️  All previous jobs deleted!"))
+        self.stdout.write(self.style.WARNING(" All previous jobs deleted!"))
 
         saved_count = 0  #" counter for successfully saved jobs
         skipped_count = 0  # "count rows that failed
