@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 import csv
 from dateutil import parser
+from datetime import date
 from job_recom.models import Job, Company
 
 
@@ -12,10 +13,10 @@ class Command(BaseCommand):
 
         # Delete all previous jobs before loading new ones
         Job.objects.all().delete()
-        self.stdout.write(self.style.WARNING(" All previous jobs deleted!"))
+        self.stdout.write(self.style.WARNING("All previous jobs deleted!"))
 
-        saved_count = 0  #" counter for successfully saved jobs
-        skipped_count = 0  # "count rows that failed
+        saved_count = 0
+        skipped_count = 0
 
         try:
             with open(csv_file_path, mode='r', encoding='utf-8') as file:
@@ -23,11 +24,10 @@ class Command(BaseCommand):
 
                 for row in reader:
                     try:
-                        # Skip completely empty rows
+                        # Skip empty rows
                         if not any(row.values()):
                             continue
 
-                        # Helper: safely strip None or missing values
                         def safe_strip(value):
                             return str(value).strip() if value is not None else ""
 
@@ -43,9 +43,15 @@ class Command(BaseCommand):
                             },
                         )
 
-                        # --- Handle Dates (auto-detect formats) ---
-                        created_date = parser.parse(safe_strip(row.get('created_date'))).date()
-                        deadline = parser.parse(safe_strip(row.get('deadline'))).date()
+                        # --- Parse Dates Safely ---
+                        def parse_date(value):
+                            try:
+                                return parser.parse(safe_strip(value)).date()
+                            except Exception:
+                                return None
+
+                        created_date = parse_date(row.get('created_date')) or date.today()
+                        deadline = parse_date(row.get('deadline'))
 
                         # --- Create Job record ---
                         Job.objects.create(
@@ -65,19 +71,21 @@ class Command(BaseCommand):
                         )
 
                         saved_count += 1
-                        self.stdout.write(self.style.SUCCESS(f" Saved: {safe_strip(row.get('title')) or 'Untitled Job'} at {company_name}"))
+                        self.stdout.write(self.style.SUCCESS(
+                            f"Saved: {safe_strip(row.get('title')) or 'Untitled Job'} at {company_name}"
+                        ))
 
                     except Exception as inner_error:
                         skipped_count += 1
                         self.stderr.write(self.style.ERROR(f"Error processing row: {row}"))
-                        self.stderr.write(self.style.ERROR(f" Reason: {inner_error}"))
+                        self.stderr.write(self.style.ERROR(f"Reason: {inner_error}"))
 
-            self.stdout.write(self.style.SUCCESS(f"\n Import Complete!"))
+            self.stdout.write(self.style.SUCCESS("\nImport Complete!"))
             self.stdout.write(self.style.SUCCESS(f"Total Jobs Saved: {saved_count}"))
-            self.stdout.write(self.style.WARNING(f" Skipped Rows (errors): {skipped_count}"))
+            self.stdout.write(self.style.WARNING(f"Skipped Rows (errors only): {skipped_count}"))
             self.stdout.write(self.style.SUCCESS(f"Total in database now: {Job.objects.count()}"))
 
         except FileNotFoundError:
             self.stderr.write(self.style.ERROR(f"CSV file not found at path: {csv_file_path}"))
         except Exception as e:
-            self.stderr.write(self.style.ERROR(f" Unexpected error: {e}"))
+            self.stderr.write(self.style.ERROR(f"Unexpected error: {e}"))
