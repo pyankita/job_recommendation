@@ -80,16 +80,28 @@
         </form>
 
         <!-- Apply Job -->
-        <form method="POST" action="{% url 'apply_job' job.id %}">
-            {% csrf_token %}
-            <button type="submit" style="background: {% if job.is_applied %}#16a34a{% else %}#2563eb{% endif %}; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-weight:bold; cursor:pointer;">
-                {% if job.is_applied %}
-                    Applied
-                {% else %}
-                    Apply
-                {% endif %}
+            {% if job.deadline < today %}
+            <!-- Expired Message -->
+            <button disabled
+                style="background:#9ca3af; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-weight:bold; cursor:not-allowed;">
+                Expired
             </button>
-        </form>
+            {% else %}
+            <form method="POST" action="{% url 'apply_job' job.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                    style="background:{% if job.is_applied %}#16a34a{% else %}#2563eb{% endif %};
+                        color:#fff; border:none; border-radius:6px; padding:8px 18px;
+                        font-weight:bold; cursor:pointer;">
+                    {% if job.is_applied %}
+                        Applied
+                    {% else %}
+                        Apply
+                    {% endif %}
+                </button>
+            </form>
+            {% endif %}
+
 
         <!-- Rate Job -->
         <div style="display:flex; align-items:center;">

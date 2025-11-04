@@ -19,15 +19,13 @@ import json
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from .models import Job, JobRating
+from datetime import date
 
-
-
-# Uncomment and import your forms if you have them:
 from .forms import UserProfileForm, JobSearchForm, JobRatingForm
 
 from django.shortcuts import render
 from .recommendation_engine import JobRecommendationEngine
-from .models import Job  # Adjust this import if your Job model is elsewhere
+from .models import Job 
 
 
 @login_required
@@ -79,6 +77,7 @@ def dashboard(request):
     # --- Render template ---
     context = {
         'recommended_jobs': ordered_jobs,
+        'today': date.today(),
     }
     return render(request, 'dashboard.html', context)
 
@@ -120,6 +119,7 @@ def job_list(request):
         'form': form,
         'page_obj': page_obj,
         'total_jobs': jobs.count(),
+        'today': date.today()
     }
     return render(request, 'browse_jobs.html', context)
 
@@ -193,6 +193,7 @@ def job_detail(request, job_id):
         'form': form,
         'user_rating': user_rating,
         'skills_list': job.required_skills.split(',') if job.required_skills else [],
+        'today': date.today(),      
     }
     return render(request, 'job_detail.html', context)
 

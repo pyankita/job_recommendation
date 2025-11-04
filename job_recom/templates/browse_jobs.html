@@ -37,11 +37,18 @@
         {% if page_obj.object_list %}
             <div class="list-group">
                 {% for job in page_obj.object_list %}
-                    <div class="list-group-item mb-3 p-3 border rounded shadow-sm">
+                    {% now "Y-m-d" as today_date %}
+                    <div class="list-group-item mb-3 p-3 border rounded shadow-sm {% if job.deadline and job.deadline < today_date %}bg-light text-muted{% endif %}">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h5 class="mb-1">
-                                    <a href="{% url 'job_detail' job.id %}" class="text-decoration-none">{{ job.title }}</a>
+                                    <a href="{% url 'job_detail' job.id %}" 
+                                       class="text-decoration-none {% if job.deadline and job.deadline < today_date %}text-muted{% else %}text-dark{% endif %}">
+                                        {{ job.title }}
+                                    </a>
+                                    {% if job.deadline and job.deadline < today_date %}
+                                        <span class="badge bg-danger ms-2">Expired</span>
+                                    {% endif %}
                                 </h5>
                                 <small class="text-muted">{{ job.company.name }} • {{ job.location }}</small>
                             </div>
@@ -54,22 +61,7 @@
 
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-end align-items-center mt-2 gap-2">
-                            {% now "Y-m-d" as today_date %}
-                            {% if job.deadline and job.deadline < today_date %}
-                                <button type="button" class="btn btn-danger" disabled>Expired</button>
-                            {% else %}
-                                <form method="POST" action="{% url 'apply_job' job.id %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary">
-                                        {% if job.is_applied %}
-                                            Applied
-                                        {% else %}
-                                            Apply
-                                        {% endif %}
-                                    </button>
-                                </form>
-                            {% endif %}
-
+                          
                             <form method="POST" action="{% url 'save_job' job.id %}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-outline-primary">
@@ -120,7 +112,6 @@
         {% else %}
             <p class="text-center mt-4">No jobs found matching your criteria.</p>
         {% endif %}
-
     </div>
 </div>
 {% endblock %}
