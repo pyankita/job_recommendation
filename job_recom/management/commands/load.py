@@ -11,7 +11,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         csv_file_path = 'generated_jobs.csv'
 
-        # Delete all previous jobs before loading new ones
         Job.objects.all().delete()
         self.stdout.write(self.style.WARNING("All previous jobs deleted!"))
 
@@ -24,14 +23,12 @@ class Command(BaseCommand):
 
                 for row in reader:
                     try:
-                        # Skip empty rows
                         if not any(row.values()):
                             continue
 
                         def safe_strip(value):
                             return str(value).strip() if value is not None else ""
 
-                        # --- Handle Company ---
                         company_name = safe_strip(row.get('company', 'Unknown Company'))
                         company_obj, _ = Company.objects.get_or_create(
                             name=company_name or "Unknown Company",
@@ -43,7 +40,6 @@ class Command(BaseCommand):
                             },
                         )
 
-                        # --- Parse Dates Safely ---
                         def parse_date(value):
                             try:
                                 return parser.parse(safe_strip(value)).date()
@@ -53,7 +49,6 @@ class Command(BaseCommand):
                         created_date = parse_date(row.get('created_date')) or date.today()
                         deadline = parse_date(row.get('deadline'))
 
-                        # --- Create Job record ---
                         Job.objects.create(
                             title=safe_strip(row.get('title')),
                             description=safe_strip(row.get('description')),

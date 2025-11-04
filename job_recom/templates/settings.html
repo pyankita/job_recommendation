@@ -110,7 +110,6 @@
 
 <div class="settings-container">
 
-    <!-- Account Preferences -->
     <div class="settings-section">
         <h3>Account Preferences</h3>
 
@@ -122,7 +121,6 @@
  
     </div>
 
-    <!-- Security -->
     <div class="settings-section">
         <h3>Security</h3>
     
@@ -151,18 +149,16 @@
 </div>
 
 <script>
-    // Dark mode toggle
     const themeToggle = document.getElementById('themeToggle');
     themeToggle?.addEventListener('change', function() {
         document.body.classList.toggle('light-mode', !this.checked);
-        // Optional: send AJAX to save preference
+
     });
 
-    // Location toggle
     const locationToggle = document.getElementById('locationToggle');
     locationToggle?.addEventListener('change', function() {
         console.log('Location allowed:', this.checked);
-        // Optional: send AJAX to save preference
+
     });
 </script>
 {% endblock %}

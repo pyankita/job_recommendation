@@ -4,12 +4,12 @@
 {% block content %}
 <div class="main-content" style="padding: 20px; background-color: #f3f4f6; min-height: 100vh;">
     
-    <!-- Header -->
+
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
         <h1 style="font-size: 1.8rem; font-weight: 700; color: #1e293b;">Welcome, {{ user.first_name }}</h1>
     </div>
 
-    <!-- Recommended Jobs Section -->
+
     <div class="section jobs-section" style="background: #fff; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0;">Recommended Jobs</h3>
@@ -20,12 +20,12 @@
                 {% for job in recommended_jobs %}
                 <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; width: 360px; display: flex; flex-direction: column; box-shadow: 0 3px 10px rgba(0,0,0,0.04); transition: transform 0.2s;">
 
-                    <!-- Job Title & Company -->
+
                     <div style="margin-bottom: 10px;">
                         <a href="{% url 'job_detail' job.id %}" style="text-decoration: none; color: #111827;">
                             <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0;">
                                 {{ job.title }}
-                                <!-- Expired Badge -->
+
                                 {% if job.deadline and job.deadline < today %}
                                     <span style="color: #dc2626; font-size: 0.85rem; margin-left: 8px; font-weight: 600;">(Expired)</span>
                                 {% endif %}
@@ -51,12 +51,12 @@
                         </p>
                     </div>
 
-                    <!-- Short Description -->
+                   
                     <p style="font-size: 0.95rem; color: #334155; margin-bottom: 12px;">
                         {{ job.description|truncatechars:120 }}
                     </p>
 
-                    <!-- Requirements -->
+
                     {% if job.requirements_list %}
                     <div style="background: #eff6ff; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
                         <strong style="color: #1e3a8a;">Requirements:</strong>
@@ -68,14 +68,14 @@
                     </div>
                     {% endif %}
 
-                    <!-- Action Buttons -->
+
                     <div style="display: flex; gap: 10px; margin-top: auto;">
                         <button type="button" class="save-btn" data-job-id="{{ job.id }}" 
                                 style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 6px 16px; font-size: 0.95rem; cursor: pointer;">
                             {% if job.is_saved %}Saved{% else %}Save{% endif %}
                         </button>
 
-                        <!-- Expired Job Handling -->
+
                         {% if job.deadline and job.deadline < today %}
                             <button disabled 
                                     style="background: #9ca3af; color: white; border: none; border-radius: 6px; padding: 6px 16px; font-size: 0.95rem; cursor: not-allowed;">
@@ -100,7 +100,7 @@
     </div>
 </div>
 
-<!-- Save Job AJAX -->
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const saveButtons = document.querySelectorAll(".save-btn");

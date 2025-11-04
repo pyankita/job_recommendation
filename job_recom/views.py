@@ -12,7 +12,6 @@ from .forms import UserRegistrationForm
 from .models import UserProfile 
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib import messages
-#Import your recommendation engine class (adjust path if needed)
 from .management.commands.recommendation import JobRecommendationEngine
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -37,35 +36,29 @@ def dashboard(request):
     user = request.user
     user_id = user.id
 
-    # --- Hybrid Recommendations (Primary) ---
     recs = engine.hybrid_recommendations(user_id, 6)
 
-    # --- Fallback to Content-based ---
     if not recs:
         print("[DEBUG] Hybrid recommendations returned nothing. Falling back to content-based.")
         recs = engine.content_based_recommendations(user_id, 6)
 
     print("[DEBUG] Final Recommendations:", recs)
 
-    # --- Extract job IDs properly ---
     job_ids = []
     try:
         for rec in recs:
-            if isinstance(rec, dict):  # content-based fallback returns dicts
+            if isinstance(rec, dict):  
                 job_ids.append(rec.get('job_id'))
-            elif isinstance(rec, (tuple, list)) and len(rec) >= 1:  # hybrid returns tuples
+            elif isinstance(rec, (tuple, list)) and len(rec) >= 1: 
                 job_ids.append(rec[0])
     except Exception as e:
         print("[ERROR] Recommendation unpacking failed:", e)
 
-    # --- Fetch jobs from DB ---
     jobs = Job.objects.filter(id__in=job_ids, is_active=True)
 
-    # Maintain order of recommendations
     job_dict = {job.id: job for job in jobs}
     ordered_jobs = [job_dict[job_id] for job_id in job_ids if job_id in job_dict]
 
-    # --- Add is_saved flag for each job ---
     for job in ordered_jobs:
         job.is_saved = False
         if request.user.is_authenticated:
@@ -74,7 +67,6 @@ def dashboard(request):
                 interaction_type='save'
             ).exists()
 
-    # --- Render template ---
     context = {
         'recommended_jobs': ordered_jobs,
         'today': date.today(),
@@ -84,7 +76,6 @@ def dashboard(request):
 @login_required
 def job_list(request):
     """List all jobs with search and filtering"""
-    # Make sure JobSearchForm is imported and exists
     form = JobSearchForm(request.GET or None)
     jobs = Job.objects.filter(is_active=True).select_related('company')
 
@@ -98,7 +89,7 @@ def job_list(request):
             jobs = jobs.filter(
                 Q(title__icontains=search_query) |
                 Q(description__icontains=search_query) |
-                Q(required_skills__icontains=search_query) |  # Fixed field name as per your model
+                Q(required_skills__icontains=search_query) | 
                 Q(company__name__icontains=search_query)
             )
 
@@ -128,7 +119,6 @@ def job_detail(request, job_id):
     """Job detail page with interaction tracking, rating, and saved/applied status"""
     job = get_object_or_404(Job, id=job_id, is_active=True)
 
-    # Track that user viewed this job
     if request.user.is_authenticated:
         JobInteraction.objects.get_or_create(
             user=request.user,
@@ -136,7 +126,6 @@ def job_detail(request, job_id):
             interaction_type='view'
         )
 
-    # Check if user has saved this job
     job.is_saved = False
     if request.user.is_authenticated:
         job.is_saved = job.jobinteraction_set.filter(
@@ -181,7 +170,6 @@ def job_detail(request, job_id):
     else:
         form = JobRatingForm(initial={'rating': user_rating.rating if user_rating else None})
 
-    # Fetch similar jobs
     engine = JobRecommendationEngine()
     similar_jobs_data = engine.content_based_recommendations(request.user.id, 5)
     similar_job_ids = [rec['job_id'] for rec in similar_jobs_data]
@@ -283,12 +271,10 @@ def edit_profile(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
-        # Update User basic info
         request.user.first_name = request.POST.get("first_name")
         request.user.last_name = request.POST.get("last_name")
         request.user.save()
 
-        # Update UserProfile info
         profile.location = request.POST.get("location")
         profile.skills = request.POST.get("skills")
         profile.experience_years = request.POST.get("experience_years") or 0
@@ -407,7 +393,6 @@ def job(request):
 
     jobs = Job.objects.filter(is_active=True)
 
-    # Search filter
     if search_query:
         jobs = jobs.filter(
             Q(title__icontains=search_query) |
@@ -416,11 +401,9 @@ def job(request):
             Q(required_skills__icontains=search_query)
         )
 
-    # Location filter
     if location:
         jobs = jobs.filter(location__icontains=location)
 
-    # Salary range filter
     if salary_range:
         parts = salary_range.split('-')
         try:
@@ -486,7 +469,6 @@ def rate_job_ajax(request):
         except Job.DoesNotExist:
             return JsonResponse({"status": "error", "message": "Job not found"})
 
-        # Save or update rating
         rating_obj, created = JobRating.objects.get_or_create(user=user, job=job)
         rating_obj.rating = rating_value
         rating_obj.save()

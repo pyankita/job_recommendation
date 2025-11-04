@@ -26,7 +26,7 @@
         .navbar a:hover {
             text-decoration: underline;
         }
-        /* Additional common styles here */
+
         .section {
             max-width: 1200px;
             margin: 0 auto;
@@ -35,7 +35,6 @@
 </head>
 <body>
 
-    <!-- Navigation -->
     <div class="navbar">
         <div><strong>JobMatch</strong></div>
         <div>
@@ -56,13 +55,12 @@
         </div>
     </div>
 
-    <!-- Main content -->
+
     <main>
         {% block content %}
         {% endblock %}
     </main>
 
-    <!-- Footer -->
     <footer style="background-color: #6a5094; color: white; padding: 20px 30px; text-align: center; margin-top: 40px;">
         <p>&copy; {{ now.year }} JobMatch. All rights reserved.</p>
         

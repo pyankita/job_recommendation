@@ -7,7 +7,6 @@ from django.contrib.auth.models import User
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
-    # Additional fields from UserProfile
     first_name = forms.CharField(max_length=30, required=True)
     last_name = forms.CharField(max_length=30, required=True)
     skills = forms.CharField(widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'e.g., Python, Django'}), required=False)
@@ -47,15 +46,7 @@ class JobSearchForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'placeholder': 'Location'})
     )
-    # job_type = forms.ChoiceField(
-    #     required=False,
-    #     choices=[('', 'All Types')] + Job._meta.get_field('job_type').choices
-    # )
-    # experience_level = forms.ChoiceField(
-    #     required=False,
-    #     choices=[('', 'All Levels')] + Job._meta.get_field('experience_level').choices
-    # )
-
+    
 class JobRatingForm(forms.Form):
     rating = forms.IntegerField(
         min_value=1,
