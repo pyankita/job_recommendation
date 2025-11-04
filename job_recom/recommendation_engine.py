@@ -84,20 +84,19 @@ class JobRecommendationEngine:
     def extract_job_features(self, job):
         features = []
 
-        # Title (moderate weight)
         if job.title:
             features.append(self.preprocess_text(job.title) * 2)
 
-        # Description (regular weight)
+        # Description 
         if job.description:
             features.append(self.preprocess_text(job.description))
 
-        # Requirements (high weight)
+        # Requirements 
         if job.requirements:
             requirements_text = ' '.join(job.requirements.split())
             features.append(self.preprocess_text(requirements_text * 3))
 
-        # Skills (very high weight)
+        # Skills 
         if getattr(job, 'required_skills', None):
             skills = [skill.strip() for skill in job.required_skills.split(',')]
             features.append(self.preprocess_text(' '.join(skills * 5)))
@@ -155,9 +154,7 @@ class JobRecommendationEngine:
 
         return self.tfidf_vectorizer.transform([user_features_text])
 
-    # ----------------------------
-    # Content-Based Recommendations
-    # ----------------------------
+
     def content_based_recommendations(self, user_id, num_recommendations=10):
         try:
             user_profile = UserProfile.objects.get(user_id=user_id)
