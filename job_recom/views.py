@@ -6,7 +6,6 @@ from django.db.models import Q
 from .models import Job, UserProfile, JobInteraction, Company, User
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.views.generic.edit import CreateView
 from .forms import UserRegistrationForm
 from .models import UserProfile 
@@ -19,12 +18,9 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from .models import Job, JobRating
 from datetime import date
-
 from .forms import UserProfileForm, JobSearchForm, JobRatingForm
-
 from django.shortcuts import render
 from .recommendation_engine import JobRecommendationEngine
-from .models import Job 
 
 
 @login_required
@@ -44,37 +40,49 @@ def dashboard(request):
         print("[DEBUG] Hybrid empty → fallback to content-based")
         hybrid_recs = content_recs
 
-    def extract_jobs(recs):
+    def extract_jobs_with_scores(recs):
+        jobs_with_scores = []
         job_ids = []
-        try:
-            for rec in recs:
-                if isinstance(rec, dict):
-                    job_ids.append(rec.get('job_id'))
-                elif isinstance(rec, (tuple, list)) and len(rec) >= 1:
-                    job_ids.append(rec[0])
-        except Exception as e:
-            print("[ERROR] Recommendation unpacking failed:", e)
+        scores_dict = {}
+
+        # Collect job_ids and scores
+        for rec in recs:
+            if isinstance(rec, dict):
+                job_id = rec.get('job_id')
+                score = rec.get('similarity_score') or rec.get('predicted_rating', 0)
+            elif isinstance(rec, (tuple, list)) and len(rec) >= 1:
+                job_id = rec[0]
+                score = rec[1].get('hybrid_score', 0)
+            else:
+                continue
+            job_ids.append(job_id)
+            scores_dict[job_id] = round(score, 4)
 
         jobs = Job.objects.filter(id__in=job_ids, is_active=True)
         job_dict = {job.id: job for job in jobs}
-        ordered_jobs = [job_dict[job_id] for job_id in job_ids if job_id in job_dict]
 
-        for job in ordered_jobs:
-            job.is_saved = job.jobinteraction_set.filter(
-                user=request.user,
-                interaction_type='save'
-            ).exists()
-        return ordered_jobs
+        # Order jobs same as recommendations
+        for job_id in job_ids:
+            if job_id in job_dict:
+                job = job_dict[job_id]
+                job.score = scores_dict[job_id]  # attach score
+                job.is_saved = job.jobinteraction_set.filter(
+                    user=request.user,
+                    interaction_type='save'
+                ).exists()
+                jobs_with_scores.append(job)
 
+        return jobs_with_scores
 
     context = {
-        'content_jobs': extract_jobs(content_recs),
-        'collab_jobs': extract_jobs(collab_recs),
-        'hybrid_jobs': extract_jobs(hybrid_recs),
+        'content_jobs': extract_jobs_with_scores(content_recs),
+        'collab_jobs': extract_jobs_with_scores(collab_recs),
+        'hybrid_jobs': extract_jobs_with_scores(hybrid_recs),
         'today': date.today(),
     }
 
     return render(request, 'dashboard.html', context)
+
 
 @login_required
 def job_list(request):

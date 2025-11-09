@@ -10,12 +10,10 @@ from django.contrib.auth.models import User
 from .models import Job, UserProfile, JobInteraction
 
 
-
 def display_recommendation_details(user_id, engine, recommendation_type="content"):
     """
     Display detailed recommendations for a user:
     - User info
-    - User vector
     - Recommended jobs with vectors and scores
     """
     try:
@@ -59,14 +57,14 @@ def display_recommendation_details(user_id, engine, recommendation_type="content
 
 class JobRecommendationEngine:
     """
-    Job Recommendation Engine with:
-    1. Content-based filtering (TF-IDF + cosine similarity)
-    2. Collaborative filtering (Pearson correlation)
-    3. Hybrid filtering (combination)
+    Job Recommendation Engine:
+    1. Skill-only content-based filtering (TF-IDF + cosine similarity)
+    2. Collaborative filtering (Pearson correlation based on ratings)
+    3. Hybrid filtering (combined)
     """
 
     def __init__(self):
-        self.tfidf_vectorizer = TfidfVectorizer(max_features=5000, stop_words='english', ngram_range=(1, 2))
+        self.tfidf_vectorizer = TfidfVectorizer(stop_words='english')
         self.job_features_matrix = None
         self.job_ids = None
         self.user_job_ratings = None
@@ -77,43 +75,15 @@ class JobRecommendationEngine:
             return ""
         return re.sub(r'[^a-zA-Z\s]', '', str(text).lower())
 
+    # Only use job required_skills for TF-IDF
     def extract_job_features(self, job):
-        features = []
-
-        if job.title:
-            features.append(self.preprocess_text(job.title) * 2)
-
-        # Description 
-        if job.description:
-            features.append(self.preprocess_text(job.description))
-
-        # Requirements 
-        if job.requirements:
-            requirements_text = ' '.join(job.requirements.split())
-            features.append(self.preprocess_text(requirements_text * 3))
-
-        # Skills 
         if getattr(job, 'required_skills', None):
-            skills = [skill.strip() for skill in job.required_skills.split(',')]
-            features.append(self.preprocess_text(' '.join(skills * 5)))
+            skills = [s.strip() for s in job.required_skills.split(',')]
+            return self.preprocess_text(' '.join(skills))
+        return ""
 
-        if job.company:
-            features.append(self.preprocess_text(job.company.name))
-            if hasattr(job.company, 'industry') and job.company.industry:
-                features.append(self.preprocess_text(job.company.industry))
-
-
-        if hasattr(job, 'experience_level') and job.experience_level:
-            features.append(str(job.experience_level))
-        if hasattr(job, 'job_type') and job.job_type:
-            features.append(str(job.job_type))
-
-        # Location
-        features.append(self.preprocess_text(job.location or ""))
-
-        return ' '.join(features)
     def build_content_features(self):
-        jobs = Job.objects.filter(is_active=True).select_related('company')
+        jobs = Job.objects.filter(is_active=True)
         job_features, job_ids = [], []
 
         for job in jobs:
@@ -126,27 +96,15 @@ class JobRecommendationEngine:
 
         return self.job_features_matrix, self.job_ids
 
+    # Only use user skills
     def get_user_profile_vector(self, user_profile):
-        features = []
-
-        if user_profile.skills:
-            skills = [skill.strip() for skill in user_profile.skills.split(',')]
-            features.append(self.preprocess_text(' '.join(skills * 5)))
-
-        if user_profile.bio:
-            features.append(self.preprocess_text(user_profile.bio) * 2)
-
-        if user_profile.preferred_location:
-            features.append(self.preprocess_text(user_profile.preferred_location))
-
-        user_features_text = ' '.join(features)
-
+        skills = [s.strip() for s in (user_profile.skills or "").split(',')]
+        text = self.preprocess_text(' '.join(skills))
         if self.job_features_matrix is None:
             self.build_content_features()
+        return self.tfidf_vectorizer.transform([text])
 
-        return self.tfidf_vectorizer.transform([user_features_text])
-
-
+    # Content-based using only skills
     def content_based_recommendations(self, user_id, num_recommendations=10):
         try:
             user_profile = UserProfile.objects.get(user_id=user_id)
@@ -170,6 +128,7 @@ class JobRecommendationEngine:
         recommendations.sort(key=lambda x: x['similarity_score'], reverse=True)
         return recommendations[:num_recommendations]
 
+    # Build user-item rating matrix
     def build_user_item_matrix(self):
         interactions = JobInteraction.objects.filter(rating__isnull=False).values('user_id', 'job_id', 'rating')
         if not interactions:
@@ -179,6 +138,7 @@ class JobRecommendationEngine:
         self.user_job_ratings = df.pivot_table(index='user_id', columns='job_id', values='rating', fill_value=0)
         return self.user_job_ratings
 
+    # Pearson correlation for collaborative filtering
     def calculate_user_similarity(self, user_id, other_user_id):
         if self.user_job_ratings is None:
             return 0
@@ -199,6 +159,7 @@ class JobRecommendationEngine:
         except Exception:
             return 0
 
+    # Collaborative filtering based on JobInteraction ratings
     def collaborative_filtering_recommendations(self, user_id, num_recommendations=10):
         self.build_user_item_matrix()
         if self.user_job_ratings is None or user_id not in self.user_job_ratings.index:
@@ -231,6 +192,7 @@ class JobRecommendationEngine:
         recommendations.sort(key=lambda x: x['predicted_rating'], reverse=True)
         return recommendations[:num_recommendations]
 
+    # Hybrid: combine content-based and collaborative scores
     def hybrid_recommendations(self, user_id, num_recommendations=5):
         self.build_user_item_matrix()
 
@@ -247,16 +209,19 @@ class JobRecommendationEngine:
         hybrid = []
         added = set()
 
+        # Combine scores for jobs present in both
         for job_id in set(collab_dict) & set(content_dict):
             score = (collab_dict[job_id]['predicted_rating'] + content_dict[job_id]['similarity_score']) / 2
             hybrid.append((job_id, {'hybrid_score': score}))
             added.add(job_id)
 
+        # Add remaining content-based only
         for job_id, r in content_dict.items():
             if job_id not in added:
                 hybrid.append((job_id, {'hybrid_score': r['similarity_score']}))
                 added.add(job_id)
 
+        # Add remaining collaborative only
         for job_id, r in collab_dict.items():
             if job_id not in added:
                 hybrid.append((job_id, {'hybrid_score': r['predicted_rating']}))
