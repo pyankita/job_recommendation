@@ -1,68 +1,38 @@
-<div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; width: 360px; display: flex; flex-direction: column; box-shadow: 0 3px 10px rgba(0,0,0,0.04); transition: transform 0.2s;">
+<div class="job-card" style="background: #f9fafb; border-radius: 12px; padding: 16px; width: 300px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: space-between;">
     
-    <div style="margin-bottom: 10px;">
-        <a href="{% url 'job_detail' job.id %}" style="text-decoration: none; color: #111827;">
-            <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0;">
-                {{ job.title }}
-                {% if job.deadline and job.deadline < today %}
-                    <span style="color: #dc2626; font-size: 0.85rem; margin-left: 8px; font-weight: 600;">(Expired)</span>
-                {% endif %}
-            </h2>
-        </a>
-        <p style="color: #475569; margin: 4px 0; font-size: 0.95rem;">
+    <!-- Job Title -->
+    <h4 style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+        {{ job.title }}
+    </h4>
+
+    <!-- Company / Organization -->
+    {% if job.company %}
+        <p style="font-size: 0.95rem; color: #475569; margin-bottom: 8px;">
             {{ job.company.name }}
         </p>
-    </div>
-
-    <div style="font-size: 0.93rem; color: #334155; line-height: 1.6; margin-bottom: 10px;">
-        <p><strong>Location:</strong> {{ job.location }}</p>
-        <p><strong>Education:</strong> {{ job.education_level|default:"Not specified" }}</p>
-        <p><strong>Deadline:</strong> {{ job.deadline|default:"Not mentioned" }}</p>
-        <p><strong>Contact:</strong> {{ job.contact_email|default:"N/A" }}</p>
-        <p style="color: #16a34a; font-weight: 600;">
-            <strong>Salary:</strong> 
-            {% if job.salary %}
-                ${{ job.salary|floatformat:2 }}
-            {% else %}
-                Not specified
-            {% endif %}
-        </p>
-    </div>
-
-    <p style="font-size: 0.95rem; color: #334155; margin-bottom: 12px;">
-        {{ job.description|truncatechars:120 }}
-    </p>
-
-    {% if job.requirements_list %}
-    <div style="background: #eff6ff; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
-        <strong style="color: #1e3a8a;">Requirements:</strong>
-        <ul style="margin: 6px 0 0 20px; color: #1e293b; font-size: 0.9rem;">
-            {% for req in job.requirements_list %}
-                <li>{{ req }}</li>
-            {% endfor %}
-        </ul>
-    </div>
     {% endif %}
 
-    <div style="display: flex; gap: 10px; margin-top: auto;">
-        <button type="button" class="save-btn" data-job-id="{{ job.id }}" 
-                style="background: #fff; border: 1.5px solid #2563eb; color: #2563eb; border-radius: 6px; padding: 6px 16px; font-size: 0.95rem; cursor: pointer;">
-            {% if job.is_saved %}Saved{% else %}Save{% endif %}
-        </button>
+    <!-- Score -->
+    {% if show_score and job.score %}
+        <p style="font-size: 0.9rem; font-weight: 600; color: #1e40af; margin-bottom: 8px;">
+            Score: {{ job.score }}
+        </p>
+    {% endif %}
 
-        {% if job.deadline and job.deadline < today %}
-            <button disabled 
-                    style="background: #9ca3af; color: white; border: none; border-radius: 6px; padding: 6px 16px; font-size: 0.95rem; cursor: not-allowed;">
-                Expired
-            </button>
+    <!-- Job Details / Location / Salary -->
+    {% if job.location %}
+        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 4px;">📍 {{ job.location }}</p>
+    {% endif %}
+    {% if job.salary %}
+        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 8px;">💰 {{ job.salary }}</p>
+    {% endif %}
+
+    <!-- Save Button -->
+    <button class="save-btn" data-job-id="{{ job.id }}" style="padding: 6px 12px; border-radius: 8px; border: none; background-color: #2563eb; color: #fff; cursor: pointer;">
+        {% if job.is_saved %}
+            Saved
         {% else %}
-            <form method="POST" action="{% url 'apply_job' job.id %}">
-                {% csrf_token %}
-                <button type="submit" 
-                        style="background: #2563eb; color: white; border: none; border-radius: 6px; padding: 6px 16px; font-size: 0.95rem; cursor: pointer;">
-                    Apply
-                </button>
-            </form>
+            Save
         {% endif %}
-    </div>
+    </button>
 </div>

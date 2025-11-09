@@ -32,13 +32,17 @@ def dashboard(request):
     user = request.user
     user_id = user.id
 
+    # Get recommendations
     content_recs = engine.content_based_recommendations(user_id, 6)
     collab_recs = engine.collaborative_filtering_recommendations(user_id, 6)
     hybrid_recs = engine.hybrid_recommendations(user_id, 6)
 
+    # Inform user if no recommendations available
     if not hybrid_recs:
-        print("[DEBUG] Hybrid empty → fallback to content-based")
-        hybrid_recs = content_recs
+        messages.info(
+            request,
+            "No recommendations available yet. Update your skills or rate jobs to get personalized recommendations."
+        )
 
     def extract_jobs_with_scores(recs):
         jobs_with_scores = []
@@ -58,14 +62,15 @@ def dashboard(request):
             job_ids.append(job_id)
             scores_dict[job_id] = round(score, 4)
 
+        # Fetch jobs from DB
         jobs = Job.objects.filter(id__in=job_ids, is_active=True)
         job_dict = {job.id: job for job in jobs}
 
-        # Order jobs same as recommendations
+        # Order jobs same as recommendation order and attach scores
         for job_id in job_ids:
             if job_id in job_dict:
                 job = job_dict[job_id]
-                job.score = scores_dict[job_id]  # attach score
+                job.score = scores_dict[job_id]
                 job.is_saved = job.jobinteraction_set.filter(
                     user=request.user,
                     interaction_type='save'
@@ -82,7 +87,6 @@ def dashboard(request):
     }
 
     return render(request, 'dashboard.html', context)
-
 
 @login_required
 def job_list(request):

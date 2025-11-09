@@ -20,7 +20,7 @@
         <div style="display: flex; flex-wrap: wrap; gap: 24px;">
             {% if content_jobs %}
                 {% for job in content_jobs %}
-                    {% include 'partials/job_card.html' %}
+                    {% include 'partials/job_card.html' with job=job show_score=True %}
                 {% endfor %}
             {% else %}
                 <p>No content-based recommendations found.</p>
@@ -39,7 +39,7 @@
         <div style="display: flex; flex-wrap: wrap; gap: 24px;">
             {% if collab_jobs %}
                 {% for job in collab_jobs %}
-                    {% include 'partials/job_card.html' %}
+                    {% include 'partials/job_card.html' with job=job show_score=True %}
                 {% endfor %}
             {% else %}
                 <p>No collaborative recommendations found.</p>
@@ -58,7 +58,7 @@
         <div style="display: flex; flex-wrap: wrap; gap: 24px;">
             {% if hybrid_jobs %}
                 {% for job in hybrid_jobs %}
-                    {% include 'partials/job_card.html' %}
+                    {% include 'partials/job_card.html' with job=job show_score=True %}
                 {% endfor %}
             {% else %}
                 <p>No hybrid recommendations found.</p>
@@ -66,7 +66,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- 🧠 JavaScript for Save Button -->
 <script>

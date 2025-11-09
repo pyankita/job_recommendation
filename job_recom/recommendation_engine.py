@@ -13,8 +13,8 @@ from .models import Job, UserProfile, JobInteraction
 class JobRecommendationEngine:
     """
     Job Recommendation Engine:
-    1. Content-based filtering (TF-IDF + cosine similarity) using user skills
-    2. Collaborative filtering (Pearson correlation based on ratings)
+    1. Content-based filtering (TF-IDF + cosine similarity)
+    2. Collaborative filtering (Pearson correlation)
     3. Hybrid filtering (mean of content + collaborative scores)
     """
 
@@ -30,16 +30,13 @@ class JobRecommendationEngine:
             return ""
         return re.sub(r'[^a-zA-Z\s]', '', str(text).lower())
 
-    # ---------------- Content-Based Features ----------------
     def extract_job_features(self, job):
-        """Extract skills for TF-IDF from Job.required_skills"""
         if getattr(job, 'required_skills', None):
             skills = [s.strip() for s in job.required_skills.split(',')]
             return self.preprocess_text(' '.join(skills))
         return ""
 
     def build_content_features(self):
-        """Build TF-IDF matrix for all active jobs"""
         jobs = Job.objects.filter(is_active=True)
         job_features, job_ids = [], []
 
@@ -54,21 +51,20 @@ class JobRecommendationEngine:
         return self.job_features_matrix, self.job_ids
 
     def get_user_profile_vector(self, user_profile):
-        """Convert user skills into TF-IDF vector"""
         skills = [s.strip() for s in (user_profile.skills or "").split(',')]
         text = self.preprocess_text(' '.join(skills))
         if self.job_features_matrix is None:
             self.build_content_features()
         return self.tfidf_vectorizer.transform([text])
 
-    # ---------------- Content-Based Recommendations ----------------
+    # ======================== Content-Based Filtering ========================
     def content_based_recommendations(self, user_id, num_recommendations=10):
         try:
             user_profile = UserProfile.objects.get(user_id=user_id)
         except UserProfile.DoesNotExist:
             return []
 
-        # Return empty list if user has no skills
+        # Handle users with no skills
         if not user_profile.skills or user_profile.skills.strip() == "":
             return []
 
@@ -89,9 +85,8 @@ class JobRecommendationEngine:
         recommendations.sort(key=lambda x: x['similarity_score'], reverse=True)
         return recommendations[:num_recommendations]
 
-    # ---------------- Collaborative Filtering ----------------
+    # ======================== Collaborative Filtering ========================
     def build_user_item_matrix(self):
-        """Build user-job rating matrix"""
         interactions = JobInteraction.objects.filter(rating__isnull=False).values('user_id', 'job_id', 'rating')
         if not interactions:
             return None
@@ -101,7 +96,6 @@ class JobRecommendationEngine:
         return self.user_job_ratings
 
     def calculate_user_similarity(self, user_id, other_user_id):
-        """Pearson correlation between two users"""
         if self.user_job_ratings is None:
             return 0
         if user_id not in self.user_job_ratings.index or other_user_id not in self.user_job_ratings.index:
@@ -135,6 +129,7 @@ class JobRecommendationEngine:
         unrated_jobs = target_ratings[target_ratings == 0].index
 
         scores, sim_sums = defaultdict(float), defaultdict(float)
+
         for other_id, sim in user_sims.items():
             other_ratings = self.user_job_ratings.loc[other_id]
             for job_id in unrated_jobs:
@@ -150,92 +145,30 @@ class JobRecommendationEngine:
         recommendations.sort(key=lambda x: x['predicted_rating'], reverse=True)
         return recommendations[:num_recommendations]
 
-    # ---------------- Hybrid Recommendations ----------------
+    # ======================== Hybrid Recommendations (Mean Score) ========================
     def hybrid_recommendations(self, user_id, num_recommendations=5):
-        """Combine content-based and collaborative recommendations using mean scores"""
         self.build_user_item_matrix()
+        if self.job_features_matrix is None:
+            self.build_content_features()
 
-        # Cold start: use content-based only if user has no ratings
-        if self.user_job_ratings is None or user_id not in self.user_job_ratings.index:
-            try:
-                user_profile = UserProfile.objects.get(user_id=user_id)
-            except UserProfile.DoesNotExist:
-                return []
-
-            if not user_profile.skills or user_profile.skills.strip() == "":
-                return []
-
-            return self.content_based_recommendations(user_id, num_recommendations)
-
-        # Get both recommendations
-        collab = self.collaborative_filtering_recommendations(user_id, num_recommendations * 2)
         content = self.content_based_recommendations(user_id, num_recommendations * 2)
+        collab = self.collaborative_filtering_recommendations(user_id, num_recommendations * 2)
 
-        # Create dictionaries for easy lookup
-        collab_dict = {r['job_id']: r['predicted_rating'] for r in collab}
+        # If both are empty, return empty
+        if not content and not collab:
+            return []
+
         content_dict = {r['job_id']: r['similarity_score'] for r in content}
+        collab_dict = {r['job_id']: r['predicted_rating'] for r in collab}
 
-        # Combine all job IDs
-        all_job_ids = set(collab_dict.keys()) | set(content_dict.keys())
+        all_job_ids = set(content_dict.keys()).union(set(collab_dict.keys()))
         hybrid = []
 
         for job_id in all_job_ids:
-            collab_score = collab_dict.get(job_id, 0)
             content_score = content_dict.get(job_id, 0)
-            mean_score = (collab_score + content_score) / 2
+            collab_score = collab_dict.get(job_id, 0)
+            mean_score = (content_score + collab_score) / 2
             hybrid.append((job_id, {'hybrid_score': mean_score}))
 
-        # Sort descending by hybrid score
         hybrid.sort(key=lambda x: x[1]['hybrid_score'], reverse=True)
         return hybrid[:num_recommendations]
-
-
-# ---------------- Debug / Display Utility ----------------
-def display_recommendation_details(user_id, engine, recommendation_type="content", num_recommendations=5):
-    """
-    Display detailed recommendations:
-    - User info and skills
-    - Recommended jobs with vectors and scores
-    """
-    try:
-        user = User.objects.get(id=user_id)
-        user_profile = UserProfile.objects.get(user_id=user_id)
-    except (User.DoesNotExist, UserProfile.DoesNotExist):
-        print(f"User with ID {user_id} not found.")
-        return
-
-    print(f"\n{'='*50}\nUser: {user.username}\nSkills: {user_profile.skills}\n{'='*50}")
-
-    if engine.job_features_matrix is None:
-        engine.build_content_features()
-
-    user_vector = engine.get_user_profile_vector(user_profile)
-    print("\nUser TF-IDF Vector:\n", user_vector.toarray())
-
-    if recommendation_type == "content":
-        recommendations = engine.content_based_recommendations(user_id, num_recommendations=num_recommendations)
-    elif recommendation_type == "collaborative":
-        recommendations = engine.collaborative_filtering_recommendations(user_id, num_recommendations=num_recommendations)
-    else:
-        recommendations = engine.hybrid_recommendations(user_id, num_recommendations=num_recommendations)
-
-    if not recommendations:
-        print("No recommendations available for this user.")
-        return
-
-    for idx, rec in enumerate(recommendations, start=1):
-        job = Job.objects.get(id=rec['job_id'] if isinstance(rec, dict) else rec[0])
-        job_vector = engine.tfidf_vectorizer.transform([engine.extract_job_features(job)])
-
-        print(f"\n🔹 Job {idx}: {job.title}")
-        print("Job Vector:\n", job_vector.toarray())
-
-        if isinstance(rec, dict):
-            if 'similarity_score' in rec:
-                print(f"Similarity Score: {rec['similarity_score']:.4f}")
-            if 'predicted_rating' in rec:
-                print(f"Predicted Rating: {rec['predicted_rating']:.4f}")
-        elif isinstance(rec, tuple):
-            print(f"Hybrid Score: {rec[1]['hybrid_score']:.4f}")
-
-    print(f"\n{'='*50}\n")
