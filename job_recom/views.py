@@ -36,41 +36,44 @@ def dashboard(request):
     user = request.user
     user_id = user.id
 
-    recs = engine.hybrid_recommendations(user_id, 6)
+    content_recs = engine.content_based_recommendations(user_id, 6)
+    collab_recs = engine.collaborative_filtering_recommendations(user_id, 6)
+    hybrid_recs = engine.hybrid_recommendations(user_id, 6)
 
-    if not recs:
-        print("[DEBUG] Hybrid recommendations returned nothing. Falling back to content-based.")
-        recs = engine.content_based_recommendations(user_id, 6)
+    if not hybrid_recs:
+        print("[DEBUG] Hybrid empty → fallback to content-based")
+        hybrid_recs = content_recs
 
-    print("[DEBUG] Final Recommendations:", recs)
+    def extract_jobs(recs):
+        job_ids = []
+        try:
+            for rec in recs:
+                if isinstance(rec, dict):
+                    job_ids.append(rec.get('job_id'))
+                elif isinstance(rec, (tuple, list)) and len(rec) >= 1:
+                    job_ids.append(rec[0])
+        except Exception as e:
+            print("[ERROR] Recommendation unpacking failed:", e)
 
-    job_ids = []
-    try:
-        for rec in recs:
-            if isinstance(rec, dict):  
-                job_ids.append(rec.get('job_id'))
-            elif isinstance(rec, (tuple, list)) and len(rec) >= 1: 
-                job_ids.append(rec[0])
-    except Exception as e:
-        print("[ERROR] Recommendation unpacking failed:", e)
+        jobs = Job.objects.filter(id__in=job_ids, is_active=True)
+        job_dict = {job.id: job for job in jobs}
+        ordered_jobs = [job_dict[job_id] for job_id in job_ids if job_id in job_dict]
 
-    jobs = Job.objects.filter(id__in=job_ids, is_active=True)
-
-    job_dict = {job.id: job for job in jobs}
-    ordered_jobs = [job_dict[job_id] for job_id in job_ids if job_id in job_dict]
-
-    for job in ordered_jobs:
-        job.is_saved = False
-        if request.user.is_authenticated:
+        for job in ordered_jobs:
             job.is_saved = job.jobinteraction_set.filter(
                 user=request.user,
                 interaction_type='save'
             ).exists()
+        return ordered_jobs
+
 
     context = {
-        'recommended_jobs': ordered_jobs,
+        'content_jobs': extract_jobs(content_recs),
+        'collab_jobs': extract_jobs(collab_recs),
+        'hybrid_jobs': extract_jobs(hybrid_recs),
         'today': date.today(),
     }
+
     return render(request, 'dashboard.html', context)
 
 @login_required
