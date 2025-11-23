@@ -4,8 +4,10 @@
 {% block content %}
 <div class="job-detail-container" style="max-width:900px; margin:40px auto; padding:20px;">
 
+    <!-- Job Title -->
     <h1 style="font-size:2rem; font-weight:bold; color:#1e40af; margin-bottom:10px;">{{ job.title }}</h1>
 
+    <!-- Job Info -->
     <div style="margin-bottom:20px; line-height:1.6;">
         <p><strong>Company:</strong> {{ job.company.name }}</p>
         <p><strong>Location:</strong> {{ job.location }}</p>
@@ -23,10 +25,11 @@
         <p><strong>Contact Email:</strong> {{ job.contact_email }}</p>
     </div>
 
-    {% if job.required_skills %}
+    <!-- Required Skills -->
+    {% if skills_list %}
         <div style="margin-bottom:20px;">
             <h3 style="font-size:1.2rem; font-weight:bold; color:#1e3a8a; margin-bottom:10px;">Required Skills</h3>
-            {% for skill in job.required_skills_list %}
+            {% for skill in skills_list %}
                 <span style="display:inline-block; background:#f0f0f0; color:#111; padding:5px 10px; border-radius:5px; margin:4px 4px 4px 0; font-size:0.9rem;">
                     {{ skill }}
                 </span>
@@ -34,32 +37,33 @@
         </div>
     {% endif %}
 
+    <!-- Job Description -->
     {% if job.description %}
-    <div style="margin-bottom:20px; background:#f8fafc; padding:20px; border-radius:10px; border:1px solid #e5e7eb;">
-        <h3 style="font-size:1.3rem; font-weight:bold; color:#1e3a8a;">Job Description</h3>
-        <p style="color:#333; line-height:1.6;">{{ job.description }}</p>
-    </div>
+        <div style="margin-bottom:20px; background:#f8fafc; padding:20px; border-radius:10px; border:1px solid #e5e7eb;">
+            <h3 style="font-size:1.3rem; font-weight:bold; color:#1e3a8a;">Job Description</h3>
+            <p style="color:#333; line-height:1.6;">{{ job.description }}</p>
+        </div>
     {% endif %}
 
-
+    <!-- Requirements -->
     {% if job.requirements %}
-    <div style="margin-bottom:20px; background:#f9fafb; padding:20px; border-radius:10px; border:1px solid #e5e7eb;">
-        <h3 style="font-size:1.2rem; font-weight:bold; color:#1e3a8a;">Requirements</h3>
-        <p style="color:#333; line-height:1.6;">{{ job.requirements }}</p>
-    </div>
+        <div style="margin-bottom:20px; background:#f9fafb; padding:20px; border-radius:10px; border:1px solid #e5e7eb;">
+            <h3 style="font-size:1.2rem; font-weight:bold; color:#1e3a8a;">Requirements</h3>
+            <p style="color:#333; line-height:1.6;">{{ job.requirements }}</p>
+        </div>
     {% endif %}
 
-   
+    <!-- Responsibilities -->
     {% if job.responsibilities %}
-    <div style="margin-bottom:30px; background:#f9fafb; padding:20px; border-radius:10px; border:1px solid #e5e7eb;">
-        <h3 style="font-size:1.2rem; font-weight:bold; color:#1e3a8a;">Responsibilities</h3>
-        <p style="color:#333; line-height:1.6;">{{ job.responsibilities }}</p>
-    </div>
+        <div style="margin-bottom:30px; background:#f9fafb; padding:20px; border-radius:10px; border:1px solid #e5e7eb;">
+            <h3 style="font-size:1.2rem; font-weight:bold; color:#1e3a8a;">Responsibilities</h3>
+            <p style="color:#333; line-height:1.6;">{{ job.responsibilities }}</p>
+        </div>
     {% endif %}
 
-    
-    <div style="display:flex; gap:15px; align-items:center;">
-        
+    <!-- Save / Apply / Rate Buttons -->
+    <div style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+        <!-- Save -->
         <form method="POST" action="{% url 'save_job' job.id %}">
             {% csrf_token %}
             <button type="submit"
@@ -67,39 +71,29 @@
                     color: {% if job.is_saved %}#fff{% else %}#2563eb{% endif %};
                     border:1.5px solid #2563eb; border-radius:6px;
                     padding:8px 18px; font-weight:bold; cursor:pointer;">
-                {% if job.is_saved %}
-                    Saved
-                {% else %}
-                    Save
-                {% endif %}
+                {% if job.is_saved %}Saved{% else %}Save{% endif %}
             </button>
         </form>
 
-        
-            {% if job.deadline < today %}
-            
+        <!-- Apply -->
+        {% if job.deadline < today %}
             <button disabled
                 style="background:#9ca3af; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-weight:bold; cursor:not-allowed;">
                 Expired
             </button>
-            {% else %}
+        {% else %}
             <form method="POST" action="{% url 'apply_job' job.id %}">
                 {% csrf_token %}
                 <button type="submit"
                     style="background:{% if job.is_applied %}#16a34a{% else %}#2563eb{% endif %};
                         color:#fff; border:none; border-radius:6px; padding:8px 18px;
                         font-weight:bold; cursor:pointer;">
-                    {% if job.is_applied %}
-                        Applied
-                    {% else %}
-                        Apply
-                    {% endif %}
+                    {% if job.is_applied %}Applied{% else %}Apply{% endif %}
                 </button>
             </form>
-            {% endif %}
+        {% endif %}
 
-
-        <!-- Rate Job -->
+        <!-- Rate -->
         <div style="display:flex; align-items:center;">
             <input type="number" id="rating-input" name="rating" min="1" max="5" 
                 value="{{ user_rating|default:0 }}" 
@@ -110,44 +104,55 @@
                 {% if job.is_rated %}Rated{% else %}Rate{% endif %}
             </button>
         </div>
-
     </div>
 
 </div>
 
+<!-- Similar Jobs Section (Dashboard-style cards with score) -->
+{% if similar_jobs %}
+<div class="similar-jobs" style="max-width:1200px; margin:40px auto; padding:20px;">
+    <h2 style="font-size:1.5rem; font-weight:bold; color:#2563eb; margin-bottom:20px;">Other Recommended Jobs</h2>
+    <div style="display:flex; flex-wrap:wrap; gap:20px;">
+        {% for j in similar_jobs %}
+            {% include 'partials/job_card.html' with job=j show_score=True %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Rate Job AJAX Script -->
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const rateBtn = document.getElementById("rate-btn");
-        const ratingInput = document.getElementById("rating-input");
-        const csrftoken = '{{ csrf_token }}';
-    
-        rateBtn.addEventListener("click", function() {
-            const jobId = this.dataset.jobId;
-            const rating = ratingInput.value;
-    
-            fetch("{% url 'rate_job_ajax' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrftoken
-                },
-                body: JSON.stringify({ job_id: jobId, rating: rating })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if(data.status === "rated"){
-                    rateBtn.textContent = "Rated";
-                    rateBtn.style.background = "#f59e0b";
-                } else if(data.status === "unrated"){
-                    rateBtn.textContent = "Rate";
-                    rateBtn.style.background = "#34d399";
-                } else if(data.status === "error"){
-                    alert(data.message);
-                }
-            })
-            .catch(err => console.error("Error:", err));
-        });
+document.addEventListener("DOMContentLoaded", function() {
+    const rateBtn = document.getElementById("rate-btn");
+    const ratingInput = document.getElementById("rating-input");
+    const csrftoken = '{{ csrf_token }}';
+
+    rateBtn.addEventListener("click", function() {
+        const jobId = this.dataset.jobId;
+        const rating = ratingInput.value;
+
+        fetch("{% url 'rate_job_ajax' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken
+            },
+            body: JSON.stringify({ job_id: jobId, rating: rating })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === "rated"){
+                rateBtn.textContent = "Rated";
+                rateBtn.style.background = "#f59e0b";
+            } else if(data.status === "unrated"){
+                rateBtn.textContent = "Rate";
+                rateBtn.style.background = "#34d399";
+            } else if(data.status === "error"){
+                alert(data.message);
+            }
+        })
+        .catch(err => console.error("Error:", err));
     });
-    </script>
-    
+});
+</script>
 {% endblock %}

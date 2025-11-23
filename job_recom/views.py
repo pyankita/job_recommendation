@@ -33,9 +33,9 @@ def dashboard(request):
     user_id = user.id
 
     # Get recommendations
-    content_recs = engine.content_based_recommendations(user_id, 6)
-    collab_recs = engine.collaborative_filtering_recommendations(user_id, 6)
-    hybrid_recs = engine.hybrid_recommendations(user_id, 6)
+    content_recs = engine.content_based_recommendations(user_id, 9)
+    collab_recs = engine.collaborative_filtering_recommendations(user_id, 9)
+    hybrid_recs = engine.hybrid_recommendations(user_id, 9)
 
     # Inform user if no recommendations available
     if not hybrid_recs:
@@ -131,7 +131,6 @@ def job_list(request):
 
 @login_required
 def job_detail(request, job_id):
-    """Job detail page with interaction tracking, rating, and saved/applied status"""
     job = get_object_or_404(Job, id=job_id, is_active=True)
 
     if request.user.is_authenticated:
@@ -141,32 +140,26 @@ def job_detail(request, job_id):
             interaction_type='view'
         )
 
-    job.is_saved = False
-    if request.user.is_authenticated:
-        job.is_saved = job.jobinteraction_set.filter(
-            user=request.user,
-            interaction_type='save'
-        ).exists()
+    job.is_saved = job.jobinteraction_set.filter(
+        user=request.user,
+        interaction_type='save'
+    ).exists()
 
-    # Check if user has applied to this job
-    job.is_applied = False
-    if request.user.is_authenticated:
-        job.is_applied = job.jobinteraction_set.filter(
-            user=request.user,
-            interaction_type='apply'
-        ).exists()
+    job.is_applied = job.jobinteraction_set.filter(
+        user=request.user,
+        interaction_type='apply'
+    ).exists()
 
-    # Get user's previous rating if any
-    user_rating = None
-    if request.user.is_authenticated:
-        user_rating = JobInteraction.objects.filter(
-            user=request.user,
-            job=job,
-            rating__isnull=False
-        ).first()
+    # Rating
+    user_rating_obj = JobInteraction.objects.filter(
+        user=request.user,
+        job=job,
+        rating__isnull=False
+    ).first()
+    user_rating = user_rating_obj.rating if user_rating_obj else None
 
-    # Handle rating form submission
-    if request.method == 'POST' and request.user.is_authenticated:
+    # Rating form
+    if request.method == 'POST':
         form = JobRatingForm(request.POST)
         if form.is_valid():
             rating = form.cleaned_data['rating']
@@ -179,24 +172,34 @@ def job_detail(request, job_id):
             if not created:
                 interaction.rating = rating
                 interaction.save()
-
             messages.success(request, 'Your rating has been saved!')
             return redirect('job_detail', job_id=job.id)
     else:
-        form = JobRatingForm(initial={'rating': user_rating.rating if user_rating else None})
+        form = JobRatingForm(initial={'rating': user_rating})
 
+    # --- Recommendations based on the current job ---
     engine = JobRecommendationEngine()
-    similar_jobs_data = engine.content_based_recommendations(request.user.id, 5)
-    similar_job_ids = [rec['job_id'] for rec in similar_jobs_data]
-    similar_jobs = Job.objects.filter(id__in=similar_job_ids, is_active=True).select_related('company')
+    engine.build_content_features()  # Make sure features are ready
+
+    # Filter top 5 similar jobs excluding the current job
+    content_recs = engine.content_based_recommendations(request.user.id, 10)
+    similar_jobs = []
+    for rec in content_recs:
+        job_id_rec = rec.get('job_id')
+        if job_id_rec != job.id:
+            similar_jobs.append(job_id_rec)
+        if len(similar_jobs) >= 5:
+            break
+
+    similar_jobs = Job.objects.filter(id__in=similar_jobs, is_active=True).select_related('company')
 
     context = {
         'job': job,
-        'similar_jobs': similar_jobs,
         'form': form,
         'user_rating': user_rating,
         'skills_list': job.required_skills.split(',') if job.required_skills else [],
-        'today': date.today(),      
+        'today': date.today(),
+        'similar_jobs': similar_jobs,  # For “Other Recommended Jobs”
     }
     return render(request, 'job_detail.html', context)
 

@@ -1,11 +1,13 @@
-<div class="job-card" style="background: #f9fafb; border-radius: 12px; padding: 16px; width: 300px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: space-between;">
-    
+<div class="job-card" 
+     style="background: #f9fafb; border-radius: 12px; padding: 16px; width: 300px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;"
+     onclick="window.location.href='{% url 'job_detail' job.id %}'">
+
     <!-- Job Title -->
     <h4 style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
         {{ job.title }}
     </h4>
 
-    <!-- Company / Organization -->
+    <!-- Company -->
     {% if job.company %}
         <p style="font-size: 0.95rem; color: #475569; margin-bottom: 8px;">
             {{ job.company.name }}
@@ -19,7 +21,7 @@
         </p>
     {% endif %}
 
-    <!-- Job Details / Location / Salary -->
+    <!-- Location / Salary -->
     {% if job.location %}
         <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 4px;">📍 {{ job.location }}</p>
     {% endif %}
@@ -28,7 +30,9 @@
     {% endif %}
 
     <!-- Save Button -->
-    <button class="save-btn" data-job-id="{{ job.id }}" style="padding: 6px 12px; border-radius: 8px; border: none; background-color: #2563eb; color: #fff; cursor: pointer;">
+    <button class="save-btn" data-job-id="{{ job.id }}" 
+            style="padding: 6px 12px; border-radius: 8px; border: none; background-color: #2563eb; color: #fff; cursor: pointer;"
+            onclick="event.stopPropagation();">
         {% if job.is_saved %}
             Saved
         {% else %}
