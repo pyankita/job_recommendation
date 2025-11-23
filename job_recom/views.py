@@ -129,28 +129,30 @@ def job_list(request):
     }
     return render(request, 'browse_jobs.html', context)
 
+
 @login_required
 def job_detail(request, job_id):
+    """Job detail page with rating, interaction tracking, and recommended jobs with scores"""
     job = get_object_or_404(Job, id=job_id, is_active=True)
 
-    if request.user.is_authenticated:
-        JobInteraction.objects.get_or_create(
-            user=request.user,
-            job=job,
-            interaction_type='view'
-        )
+    # Track view
+    JobInteraction.objects.get_or_create(
+        user=request.user,
+        job=job,
+        interaction_type='view'
+    )
 
+    # Saved & Applied status
     job.is_saved = job.jobinteraction_set.filter(
         user=request.user,
         interaction_type='save'
     ).exists()
-
     job.is_applied = job.jobinteraction_set.filter(
         user=request.user,
         interaction_type='apply'
     ).exists()
 
-    # Rating
+    # User rating
     user_rating_obj = JobInteraction.objects.filter(
         user=request.user,
         job=job,
@@ -158,7 +160,7 @@ def job_detail(request, job_id):
     ).first()
     user_rating = user_rating_obj.rating if user_rating_obj else None
 
-    # Rating form
+    # Rating form submission
     if request.method == 'POST':
         form = JobRatingForm(request.POST)
         if form.is_valid():
@@ -177,21 +179,15 @@ def job_detail(request, job_id):
     else:
         form = JobRatingForm(initial={'rating': user_rating})
 
-    # --- Recommendations based on the current job ---
+    # --- Recommendations ---
     engine = JobRecommendationEngine()
-    engine.build_content_features()  # Make sure features are ready
-
-    # Filter top 5 similar jobs excluding the current job
+    engine.build_content_features()
     content_recs = engine.content_based_recommendations(request.user.id, 10)
-    similar_jobs = []
-    for rec in content_recs:
-        job_id_rec = rec.get('job_id')
-        if job_id_rec != job.id:
-            similar_jobs.append(job_id_rec)
-        if len(similar_jobs) >= 5:
-            break
 
-    similar_jobs = Job.objects.filter(id__in=similar_jobs, is_active=True).select_related('company')
+    similar_jobs = extract_jobs_with_scores(content_recs, request.user)
+
+    # Exclude current job
+    similar_jobs = [j for j in similar_jobs if j.id != job.id][:5]
 
     context = {
         'job': job,
@@ -199,9 +195,11 @@ def job_detail(request, job_id):
         'user_rating': user_rating,
         'skills_list': job.required_skills.split(',') if job.required_skills else [],
         'today': date.today(),
-        'similar_jobs': similar_jobs,  # For “Other Recommended Jobs”
+        'similar_jobs': similar_jobs,  # This now has scores attached
     }
+
     return render(request, 'job_detail.html', context)
+
 
 @login_required
 def recommendations(request):
@@ -492,3 +490,39 @@ def rate_job_ajax(request):
         rating_obj.save()
 
         return JsonResponse({"status": "rated"})
+    
+def extract_jobs_with_scores(recs, user):
+    """
+    Takes a list of recommendation dicts and returns Job objects with attached scores.
+    """
+    jobs_with_scores = []
+    job_ids = []
+    scores_dict = {}
+
+    for rec in recs:
+        if isinstance(rec, dict):
+            job_id = rec.get('job_id')
+            score = rec.get('similarity_score') or rec.get('predicted_rating', 0)
+        elif isinstance(rec, (tuple, list)) and len(rec) >= 1:
+            job_id = rec[0]
+            score = rec[1].get('hybrid_score', 0)
+        else:
+            continue
+        job_ids.append(job_id)
+        scores_dict[job_id] = round(score, 4)
+
+    jobs = Job.objects.filter(id__in=job_ids, is_active=True).select_related('company')
+    job_dict = {job.id: job for job in jobs}
+
+    for job_id in job_ids:
+        if job_id in job_dict:
+            job = job_dict[job_id]
+            job.score = scores_dict[job_id]
+            # Optional: attach saved status
+            job.is_saved = job.jobinteraction_set.filter(
+                user=user,
+                interaction_type='save'
+            ).exists()
+            jobs_with_scores.append(job)
+
+    return jobs_with_scores

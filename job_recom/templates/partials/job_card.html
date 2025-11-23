@@ -17,21 +17,23 @@
     <!-- Score -->
     {% if show_score and job.score %}
         <p style="font-size: 0.9rem; font-weight: 600; color: #1e40af; margin-bottom: 8px;">
-            Score: {{ job.score }}
+            Score: {{ job.score|floatformat:2 }}
         </p>
     {% endif %}
 
-    <!-- Location / Salary -->
+    <!-- Location -->
     {% if job.location %}
         <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 4px;">📍 {{ job.location }}</p>
     {% endif %}
+
+    <!-- Salary -->
     {% if job.salary %}
-        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 8px;">💰 {{ job.salary }}</p>
+        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 8px;">💰 {{ job.salary|floatformat:2 }}</p>
     {% endif %}
 
     <!-- Save Button -->
     <button class="save-btn" data-job-id="{{ job.id }}" 
-            style="padding: 6px 12px; border-radius: 8px; border: none; background-color: #2563eb; color: #fff; cursor: pointer;"
+            style="padding: 6px 12px; border-radius: 8px; border: none; background-color: {% if job.is_saved %}#2563eb{% else %}#34d399{% endif %}; color: #fff; cursor: pointer;"
             onclick="event.stopPropagation();">
         {% if job.is_saved %}
             Saved
