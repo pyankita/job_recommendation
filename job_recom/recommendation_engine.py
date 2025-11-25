@@ -99,12 +99,30 @@ class JobRecommendationEngine:
 
     # ======================== Collaborative Filtering ========================
     def build_user_item_matrix(self):
-        interactions = JobInteraction.objects.filter(rating__isnull=False,interaction_type='rating').values('user_id', 'job_id', 'rating')
+        # Only use rating interactions
+        interactions = JobInteraction.objects.filter(
+            rating__isnull=False,
+            interaction_type='rating'
+        ).values('user_id', 'job_id', 'rating')
+
         if not interactions:
+            self.user_job_ratings = None
             return None
 
         df = pd.DataFrame(interactions)
-        self.user_job_ratings = df.pivot_table(index='user_id', columns='job_id', values='rating', fill_value=0)
+
+        # Handle multiple ratings: keep latest
+        df = df.sort_values('user_id')  # Optional: if timestamp exists, sort by it
+        df = df.drop_duplicates(subset=['user_id', 'job_id'], keep='last')
+
+        # Pivot table
+        self.user_job_ratings = df.pivot_table(
+            index='user_id',
+            columns='job_id',
+            values='rating',
+            fill_value=0
+        )
+
         return self.user_job_ratings
 
     def calculate_user_similarity(self, user_id, other_user_id):

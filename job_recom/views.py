@@ -126,10 +126,8 @@ def job_list(request):
     }
     return render(request, 'browse_jobs.html', context)
 
-
 @login_required
 def job_detail(request, job_id):
-    """Job detail page with rating, interaction tracking, and recommended jobs with scores"""
     job = get_object_or_404(Job, id=job_id, is_active=True)
 
     # Track view
@@ -140,61 +138,38 @@ def job_detail(request, job_id):
     )
 
     # Saved & Applied status
-    job.is_saved = job.jobinteraction_set.filter(
-        user=request.user,
-        interaction_type='save'
+    job.is_saved = JobInteraction.objects.filter(
+        user=request.user, job=job, interaction_type='save'
     ).exists()
-    job.is_applied = job.jobinteraction_set.filter(
-        user=request.user,
-        interaction_type='apply'
+    job.is_applied = JobInteraction.objects.filter(
+        user=request.user, job=job, interaction_type='apply'
     ).exists()
 
     # User rating
     user_rating_obj = JobInteraction.objects.filter(
-        user=request.user,
-        job=job,
-        rating__isnull=False
+        user=request.user, job=job, rating__isnull=False
     ).first()
-    user_rating = user_rating_obj.rating if user_rating_obj else None
+    user_rating = user_rating_obj.rating if user_rating_obj else 0  # default 0 if not rated
 
-    # Rating form submission
-    if request.method == 'POST':
-        form = JobRatingForm(request.POST)
-        if form.is_valid():
-            rating = form.cleaned_data['rating']
-            interaction, created = JobInteraction.objects.get_or_create(
-                user=request.user,
-                job=job,
-                interaction_type='like',
-                defaults={'rating': rating}
-            )
-            if not created:
-                interaction.rating = rating
-                interaction.save()
-            messages.success(request, 'Your rating has been saved!')
-            return redirect('job_detail', job_id=job.id)
-    else:
-        form = JobRatingForm(initial={'rating': user_rating})
-
-    # --- Recommendations ---
-    engine = JobRecommendationEngine()
-    engine.build_content_features()
-    content_recs = engine.content_based_recommendations(request.user.id, 10)
-
-    similar_jobs = extract_jobs_with_scores(content_recs, request.user)
-
-    # Exclude current job
-    similar_jobs = [j for j in similar_jobs if j.id != job.id][:5]
+    # Handle rating POST
+    if request.method == 'POST' and 'rating' in request.POST:
+        rating = int(request.POST['rating'])
+        interaction, created = JobInteraction.objects.get_or_create(
+            user=request.user, job=job, interaction_type='rating',
+            defaults={'rating': rating}
+        )
+        if not created:
+            interaction.rating = rating
+            interaction.save()
+        messages.success(request, 'Your rating has been saved!')
+        return redirect('job_detail', job_id=job.id)
 
     context = {
         'job': job,
-        'form': form,
         'user_rating': user_rating,
         'skills_list': job.required_skills.split(',') if job.required_skills else [],
         'today': date.today(),
-        'similar_jobs': similar_jobs,  # This now has scores attached
     }
-
     return render(request, 'job_detail.html', context)
 
 
@@ -524,38 +499,42 @@ def extract_jobs_with_scores(recs, user):
 
     return jobs_with_scores
 
+
 @login_required
 @csrf_exempt
 def rate_job_ajax(request):
     if request.method == "POST":
+        data = json.loads(request.body)
+        job_id = data.get("job_id")
+        rating = data.get("rating")
+
         try:
-            data = json.loads(request.body)
-            job_id = data.get('job_id')
-            rating = int(data.get('rating', 0))
-
-            if not (1 <= rating <= 5):
-                return JsonResponse({'status': 'error', 'message': 'Rating must be between 1 and 5.'})
-
             job = Job.objects.get(id=job_id)
-
-            # ✅ Use get_or_create to avoid multiple rows
-            interaction, created = JobInteraction.objects.get_or_create(
-                user=request.user,
-                job=job,
-                interaction_type='rating',  # Important!
-                defaults={'rating': rating}
-            )
-
-            # If it already exists, just update the rating
-            if not created:
-                interaction.rating = rating
-                interaction.save()
-
-            return JsonResponse({'status': 'rated', 'rating': interaction.rating})
-
         except Job.DoesNotExist:
-            return JsonResponse({'status': 'error', 'message': 'Job does not exist.'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
+            return JsonResponse({"status": "error", "message": "Job not found"}, status=404)
 
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+        # Get or create rating, update if exists
+        interaction, created = JobInteraction.objects.get_or_create(
+            user=request.user,
+            job=job,
+            interaction_type='rating',  # Important!
+            defaults={"rating": rating}
+        )
+
+        if not created:
+            interaction.rating = rating
+            interaction.save()
+
+        return JsonResponse({"status": "rated", "rating": interaction.rating})
+    return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
+
+
+@login_required
+def hybrid_recommendations_ajax(request):
+    engine = JobRecommendationEngine()
+    recommendations = engine.hybrid_recommendations(request.user.id, num_recommendations=5)
+    data = [
+        {"job_id": jid, "hybrid_score": score_dict["hybrid_score"]}
+        for jid, score_dict in recommendations
+    ]
+    return JsonResponse({"recommendations": data})

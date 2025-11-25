@@ -93,17 +93,19 @@
             </form>
         {% endif %}
 
-        <!-- Rate -->
-        <div style="display:flex; align-items:center;">
-            <input type="number" id="rating-input" name="rating" min="1" max="5" 
-                value="{{ user_rating|default:0 }}" 
-                style="width:60px; padding:6px; border-radius:5px; border:1px solid #ccc; font-size:0.9rem;">
-            <button id="rate-btn" data-job-id="{{ job.id }}" 
-                style="background:{% if job.is_rated %}#f59e0b{% else %}#34d399{% endif %}; 
-                    color:#fff; border:none; border-radius:6px; padding:8px 14px; font-weight:bold; cursor:pointer; margin-left:8px;">
-                {% if job.is_rated %}Rated{% else %}Rate{% endif %}
-            </button>
-        </div>
+        <!-- Rating Stars (like Save/Apply button) -->
+        <form method="POST" style="margin-top:15px;">
+            {% csrf_token %}
+            <div class="job-rating" data-job-id="{{ job.id }}">
+                {% for i in "12345" %}
+                    <button type="submit" name="rating" value="{{ i }}" 
+                        style="background:none; border:none; cursor:pointer; font-size:24px; color:{% if user_rating|default:0 >= i|add:'0' %}gold{% else %}#ccc{% endif %};">
+                        &#9733;
+                    </button>
+                {% endfor %}
+            </div>
+        </form>
+
     </div>
 
 </div>
