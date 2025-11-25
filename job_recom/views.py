@@ -22,7 +22,6 @@ from .forms import UserProfileForm, JobSearchForm, JobRatingForm
 from django.shortcuts import render
 from .recommendation_engine import JobRecommendationEngine
 
-
 @login_required
 def dashboard(request):
     engine = JobRecommendationEngine()
@@ -37,7 +36,6 @@ def dashboard(request):
     collab_recs = engine.collaborative_filtering_recommendations(user_id, 9)
     hybrid_recs = engine.hybrid_recommendations(user_id, 9)
 
-    # Inform user if no recommendations available
     if not hybrid_recs:
         messages.info(
             request,
@@ -49,7 +47,7 @@ def dashboard(request):
         job_ids = []
         scores_dict = {}
 
-        # Collect job_ids and scores
+        # Extract job_ids and scores from recommendation engine
         for rec in recs:
             if isinstance(rec, dict):
                 job_id = rec.get('job_id')
@@ -59,14 +57,20 @@ def dashboard(request):
                 score = rec[1].get('hybrid_score', 0)
             else:
                 continue
+
             job_ids.append(job_id)
             scores_dict[job_id] = round(score, 4)
 
-        # Fetch jobs from DB
-        jobs = Job.objects.filter(id__in=job_ids, is_active=True)
+        # Filter only active jobs with future deadlines and order by farthest deadline first
+        jobs = Job.objects.filter(
+            id__in=job_ids,
+            is_active=True,
+            deadline__gte=date.today()
+        ).order_by('-deadline')  # farthest deadline on top
+
         job_dict = {job.id: job for job in jobs}
 
-        # Order jobs same as recommendation order and attach scores
+        # Attach score + saved status
         for job_id in job_ids:
             if job_id in job_dict:
                 job = job_dict[job_id]
@@ -77,13 +81,20 @@ def dashboard(request):
                 ).exists()
                 jobs_with_scores.append(job)
 
-        return jobs_with_scores
+        return jobs_with_scores, jobs.count()  # also return count of future jobs
+
+    # Extract jobs and counts
+    content_jobs, content_count = extract_jobs_with_scores(content_recs)
+    collab_jobs, collab_count = extract_jobs_with_scores(collab_recs)
+    hybrid_jobs, hybrid_count = extract_jobs_with_scores(hybrid_recs)
 
     context = {
-        'content_jobs': extract_jobs_with_scores(content_recs),
-        'collab_jobs': extract_jobs_with_scores(collab_recs),
-        'hybrid_jobs': extract_jobs_with_scores(hybrid_recs),
-        'today': date.today(),
+        'content_jobs': content_jobs,
+        'collab_jobs': collab_jobs,
+        'hybrid_jobs': hybrid_jobs,
+        'content_jobs_count': content_count,
+        'collab_jobs_count': collab_count,
+        'hybrid_jobs_count': hybrid_count,
     }
 
     return render(request, 'dashboard.html', context)

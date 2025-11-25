@@ -1,11 +1,21 @@
 <div class="job-card" 
-     style="background: #f9fafb; border-radius: 12px; padding: 16px; width: 300px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;"
+     style="background: #f9fafb; border-radius: 12px; padding: 16px; width: 300px; border: 1px solid #e5e7eb; 
+            display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;"
      onclick="window.location.href='{% url 'job_detail' job.id %}'">
 
     <!-- Job Title -->
     <h4 style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
         {{ job.title }}
     </h4>
+
+    <!-- EXPIRED BADGE -->
+    {% if job.is_expired %}
+        <p style="color: white; background: #ef4444; display: inline-block; 
+                  padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; 
+                  margin-bottom: 8px;">
+            ⚠ Expired
+        </p>
+    {% endif %}
 
     <!-- Company -->
     {% if job.company %}
@@ -23,17 +33,23 @@
 
     <!-- Location -->
     {% if job.location %}
-        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 4px;">📍 {{ job.location }}</p>
+        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 4px;">
+            📍 {{ job.location }}
+        </p>
     {% endif %}
 
     <!-- Salary -->
     {% if job.salary %}
-        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 8px;">💰 {{ job.salary|floatformat:2 }}</p>
+        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 12px;">
+            💰 {{ job.salary|floatformat:2 }}
+        </p>
     {% endif %}
 
     <!-- Save Button -->
-    <button class="save-btn" data-job-id="{{ job.id }}" 
-            style="padding: 6px 12px; border-radius: 8px; border: none; background-color: {% if job.is_saved %}#2563eb{% else %}#34d399{% endif %}; color: #fff; cursor: pointer;"
+    <button class="save-btn" data-job-id="{{ job.id }}"
+            style="padding: 6px 12px; border-radius: 8px; border: none; 
+                   background-color: {% if job.is_saved %}#2563eb{% else %}#34d399{% endif %}; 
+                   color: #fff; cursor: pointer;"
             onclick="event.stopPropagation();">
         {% if job.is_saved %}
             Saved
