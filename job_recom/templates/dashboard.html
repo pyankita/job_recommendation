@@ -11,6 +11,18 @@
         </h1>
     </div>
 
+    <!-- Job Counts -->
+    <div style="margin-bottom: 30px; background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 15px;">
+            Recommended Jobs Summary
+        </h3>
+        <ul>
+            <li>Content-Based: {{ content_jobs.paginator.count }}</li>
+            <li>Collaborative: {{ collab_jobs.paginator.count }}</li>
+            <li>Hybrid: {{ hybrid_jobs.paginator.count }}</li>
+        </ul>
+    </div>
+
     <!-- 🟦 CONTENT-BASED RECOMMENDATIONS -->
     <div style="margin-bottom: 50px; background: #fff; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
         <h3 style="font-size: 1.25rem; font-weight: 700; color: #2563eb; margin-bottom: 20px;">
@@ -26,6 +38,19 @@
                 <p>No content-based recommendations found.</p>
             {% endif %}
         </div>
+
+        <!-- Pagination in the middle -->
+        {% if content_jobs.has_other_pages %}
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+            {% if content_jobs.has_previous %}
+                <a href="?content_page={{ content_jobs.previous_page_number }}" class="btn-prev">Previous</a>
+            {% endif %}
+            <span>Page {{ content_jobs.number }} of {{ content_jobs.paginator.num_pages }}</span>
+            {% if content_jobs.has_next %}
+                <a href="?content_page={{ content_jobs.next_page_number }}" class="btn-next">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 
     <hr style="margin: 30px 0;">
@@ -45,6 +70,19 @@
                 <p>No collaborative recommendations found.</p>
             {% endif %}
         </div>
+
+        <!-- Pagination in the middle -->
+        {% if collab_jobs.has_other_pages %}
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+            {% if collab_jobs.has_previous %}
+                <a href="?collab_page={{ collab_jobs.previous_page_number }}" class="btn-prev">Previous</a>
+            {% endif %}
+            <span>Page {{ collab_jobs.number }} of {{ collab_jobs.paginator.num_pages }}</span>
+            {% if collab_jobs.has_next %}
+                <a href="?collab_page={{ collab_jobs.next_page_number }}" class="btn-next">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 
     <hr style="margin: 30px 0;">
@@ -64,38 +102,52 @@
                 <p>No hybrid recommendations found.</p>
             {% endif %}
         </div>
+
+        <!-- Pagination in the middle -->
+        {% if hybrid_jobs.has_other_pages %}
+        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+            {% if hybrid_jobs.has_previous %}
+                <a href="?hybrid_page={{ hybrid_jobs.previous_page_number }}" class="btn-prev">Previous</a>
+            {% endif %}
+            <span>Page {{ hybrid_jobs.number }} of {{ hybrid_jobs.paginator.num_pages }}</span>
+            {% if hybrid_jobs.has_next %}
+                <a href="?hybrid_page={{ hybrid_jobs.next_page_number }}" class="btn-next">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 </div>
-
-<!-- 🧠 JavaScript for Save Button -->
+{% endblock %}
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const saveButtons = document.querySelectorAll(".save-btn");
+    document.addEventListener("DOMContentLoaded", function() {
+    const rateButtons = document.querySelectorAll(".rate-btn");
 
-    saveButtons.forEach(btn => {
+    rateButtons.forEach(btn => {
         btn.addEventListener("click", function() {
             const jobId = this.dataset.jobId;
+            const rating = this.dataset.rating;  // 1-5
             const csrftoken = '{{ csrf_token }}';
 
-            fetch("{% url 'save_job_ajax' %}", {
+            fetch("{% url 'rate_job_ajax' %}", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": csrftoken
                 },
-                body: JSON.stringify({ job_id: jobId })
+                body: JSON.stringify({ job_id: jobId, rating: rating })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.status === "saved") {
-                    btn.textContent = "Saved";
-                } else if (data.status === "unsaved") {
-                    btn.textContent = "Save";
+                if (data.status === "rated") {
+                    btn.textContent = `Rated ${data.rating}`;
+                } else {
+                    console.error("Error:", data.message);
                 }
             })
             .catch(error => console.error("Error:", error));
         });
     });
 });
-</script>
-{% endblock %}
+
+    </script>
+    

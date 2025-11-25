@@ -21,7 +21,7 @@ from datetime import date
 from .forms import UserProfileForm, JobSearchForm, JobRatingForm
 from django.shortcuts import render
 from .recommendation_engine import JobRecommendationEngine
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 @login_required
 def dashboard(request):
     engine = JobRecommendationEngine()
@@ -32,69 +32,55 @@ def dashboard(request):
     user_id = user.id
 
     # Get recommendations
-    content_recs = engine.content_based_recommendations(user_id, 9)
-    collab_recs = engine.collaborative_filtering_recommendations(user_id, 9)
-    hybrid_recs = engine.hybrid_recommendations(user_id, 9)
+    content_recs = engine.content_based_recommendations(user_id, 50)  # get more for pagination
+    collab_recs = engine.collaborative_filtering_recommendations(user_id, 50)
+    hybrid_recs = engine.hybrid_recommendations(user_id, 50)
 
     if not hybrid_recs:
         messages.info(
             request,
             "No recommendations available yet. Update your skills or rate jobs to get personalized recommendations."
         )
-
     def extract_jobs_with_scores(recs):
-        jobs_with_scores = []
-        job_ids = []
         scores_dict = {}
-
-        # Extract job_ids and scores from recommendation engine
         for rec in recs:
             if isinstance(rec, dict):
                 job_id = rec.get('job_id')
                 score = rec.get('similarity_score') or rec.get('predicted_rating', 0)
+                scores_dict[job_id] = round(score, 4)
             elif isinstance(rec, (tuple, list)) and len(rec) >= 1:
                 job_id = rec[0]
                 score = rec[1].get('hybrid_score', 0)
-            else:
-                continue
+                scores_dict[job_id] = round(score, 4)
 
-            job_ids.append(job_id)
-            scores_dict[job_id] = round(score, 4)
+        # Only jobs with scores
+        jobs = Job.objects.filter(id__in=scores_dict.keys(), is_active=True).order_by('-deadline')
+        jobs_with_scores = []
 
-        # Filter only active jobs with future deadlines and order by farthest deadline first
-        jobs = Job.objects.filter(
-            id__in=job_ids,
-            is_active=True,
-            deadline__gte=date.today()
-        ).order_by('-deadline')  # farthest deadline on top
+        for job in jobs:
+            job.score = scores_dict[job.id]
+            job.is_saved = job.jobinteraction_set.filter(
+                user=request.user,
+                interaction_type='save'
+            ).exists()
+            jobs_with_scores.append(job)
 
-        job_dict = {job.id: job for job in jobs}
+        return jobs_with_scores
 
-        # Attach score + saved status
-        for job_id in job_ids:
-            if job_id in job_dict:
-                job = job_dict[job_id]
-                job.score = scores_dict[job_id]
-                job.is_saved = job.jobinteraction_set.filter(
-                    user=request.user,
-                    interaction_type='save'
-                ).exists()
-                jobs_with_scores.append(job)
+    content_jobs_list = extract_jobs_with_scores(content_recs)
+    collab_jobs_list = extract_jobs_with_scores(collab_recs)
+    hybrid_jobs_list = extract_jobs_with_scores(hybrid_recs)
 
-        return jobs_with_scores, jobs.count()  # also return count of future jobs
-
-    # Extract jobs and counts
-    content_jobs, content_count = extract_jobs_with_scores(content_recs)
-    collab_jobs, collab_count = extract_jobs_with_scores(collab_recs)
-    hybrid_jobs, hybrid_count = extract_jobs_with_scores(hybrid_recs)
+    # ---------------- Pagination ----------------
+    def paginate_jobs(job_list, page_param):
+        paginator = Paginator(job_list, 6)  # 6 jobs per page
+        page_number = request.GET.get(page_param, 1)
+        return paginator.get_page(page_number)
 
     context = {
-        'content_jobs': content_jobs,
-        'collab_jobs': collab_jobs,
-        'hybrid_jobs': hybrid_jobs,
-        'content_jobs_count': content_count,
-        'collab_jobs_count': collab_count,
-        'hybrid_jobs_count': hybrid_count,
+        'content_jobs': paginate_jobs(content_jobs_list, 'content_page'),
+        'collab_jobs': paginate_jobs(collab_jobs_list, 'collab_page'),
+        'hybrid_jobs': paginate_jobs(hybrid_jobs_list, 'hybrid_page'),
     }
 
     return render(request, 'dashboard.html', context)
@@ -537,3 +523,39 @@ def extract_jobs_with_scores(recs, user):
             jobs_with_scores.append(job)
 
     return jobs_with_scores
+
+@login_required
+@csrf_exempt
+def rate_job_ajax(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            job_id = data.get('job_id')
+            rating = int(data.get('rating', 0))
+
+            if not (1 <= rating <= 5):
+                return JsonResponse({'status': 'error', 'message': 'Rating must be between 1 and 5.'})
+
+            job = Job.objects.get(id=job_id)
+
+            # ✅ Use get_or_create to avoid multiple rows
+            interaction, created = JobInteraction.objects.get_or_create(
+                user=request.user,
+                job=job,
+                interaction_type='rating',  # Important!
+                defaults={'rating': rating}
+            )
+
+            # If it already exists, just update the rating
+            if not created:
+                interaction.rating = rating
+                interaction.save()
+
+            return JsonResponse({'status': 'rated', 'rating': interaction.rating})
+
+        except Job.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Job does not exist.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})

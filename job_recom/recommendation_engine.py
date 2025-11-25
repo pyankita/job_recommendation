@@ -8,6 +8,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from django.contrib.auth.models import User
 from .models import Job, UserProfile, JobInteraction
+from datetime import date
 
 
 class JobRecommendationEngine:
@@ -25,6 +26,15 @@ class JobRecommendationEngine:
         self.user_job_ratings = None
 
     @staticmethod
+    def deactivate_expired_jobs():
+        """Mark jobs as inactive if their deadline has passed."""
+        today = date.today()
+        expired_jobs = Job.objects.filter(deadline__lt=today, is_active=True)
+        count = expired_jobs.update(is_active=False)
+        if count > 0:
+            print(f"[JobRecommendationEngine] {count} expired jobs deactivated.")
+
+    @staticmethod
     def preprocess_text(text):
         if not text:
             return ""
@@ -37,6 +47,7 @@ class JobRecommendationEngine:
         return ""
 
     def build_content_features(self):
+        self.deactivate_expired_jobs()
         jobs = Job.objects.filter(is_active=True)
         job_features, job_ids = [], []
 
@@ -59,6 +70,7 @@ class JobRecommendationEngine:
 
     # ======================== Content-Based Filtering ========================
     def content_based_recommendations(self, user_id, num_recommendations=10):
+        self.deactivate_expired_jobs()
         try:
             user_profile = UserProfile.objects.get(user_id=user_id)
         except UserProfile.DoesNotExist:
@@ -87,7 +99,7 @@ class JobRecommendationEngine:
 
     # ======================== Collaborative Filtering ========================
     def build_user_item_matrix(self):
-        interactions = JobInteraction.objects.filter(rating__isnull=False).values('user_id', 'job_id', 'rating')
+        interactions = JobInteraction.objects.filter(rating__isnull=False,interaction_type='rating').values('user_id', 'job_id', 'rating')
         if not interactions:
             return None
 
@@ -114,6 +126,7 @@ class JobRecommendationEngine:
             return 0
 
     def collaborative_filtering_recommendations(self, user_id, num_recommendations=10):
+        self.deactivate_expired_jobs()
         self.build_user_item_matrix()
         if self.user_job_ratings is None or user_id not in self.user_job_ratings.index:
             return []
@@ -147,6 +160,7 @@ class JobRecommendationEngine:
 
     # ======================== Hybrid Recommendations (Mean Score) ========================
     def hybrid_recommendations(self, user_id, num_recommendations=5):
+        self.deactivate_expired_jobs()
         self.build_user_item_matrix()
         if self.job_features_matrix is None:
             self.build_content_features()

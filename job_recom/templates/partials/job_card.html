@@ -1,7 +1,11 @@
 <div class="job-card" 
      style="background: #f9fafb; border-radius: 12px; padding: 16px; width: 300px; border: 1px solid #e5e7eb; 
             display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;"
-     onclick="window.location.href='{% url 'job_detail' job.id %}'">
+     {% if not job.is_expired %}
+         onclick="window.location.href='{% url 'job_detail' job.id %}'"
+     {% else %}
+         title="Job expired – cannot apply"
+     {% endif %}>
 
     <!-- Job Title -->
     <h4 style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">

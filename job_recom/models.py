@@ -69,6 +69,7 @@ class JobInteraction(models.Model):
         ('view', 'View'),
         ('apply', 'Apply'),
         ('save', 'Save'),
+        ('rating', 'Rating'), 
     ],blank=True,null=True)
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
