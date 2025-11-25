@@ -32,7 +32,7 @@ def dashboard(request):
     user_id = user.id
 
     # Get recommendations
-    content_recs = engine.content_based_recommendations(user_id, 50)  # get more for pagination
+    content_recs = engine.content_based_recommendations(user_id, 50)
     collab_recs = engine.collaborative_filtering_recommendations(user_id, 50)
     hybrid_recs = engine.hybrid_recommendations(user_id, 50)
 
@@ -41,6 +41,8 @@ def dashboard(request):
             request,
             "No recommendations available yet. Update your skills or rate jobs to get personalized recommendations."
         )
+
+    # ---------------- Extract Jobs with Scores & Saved/Applied Status ----------------
     def extract_jobs_with_scores(recs):
         scores_dict = {}
         for rec in recs:
@@ -53,7 +55,6 @@ def dashboard(request):
                 score = rec[1].get('hybrid_score', 0)
                 scores_dict[job_id] = round(score, 4)
 
-        # Only jobs with scores
         jobs = Job.objects.filter(id__in=scores_dict.keys(), is_active=True).order_by('-deadline')
         jobs_with_scores = []
 
@@ -63,6 +64,14 @@ def dashboard(request):
                 user=request.user,
                 interaction_type='save'
             ).exists()
+            job.is_applied = job.jobinteraction_set.filter(
+                user=request.user,
+                interaction_type='apply'
+            ).exists()
+            # Add user rating if exists
+            rating_obj = job.jobinteraction_set.filter(user=request.user, interaction_type='rating').first()
+            job.user_rating = rating_obj.rating if rating_obj else 0
+
             jobs_with_scores.append(job)
 
         return jobs_with_scores
@@ -78,13 +87,13 @@ def dashboard(request):
         return paginator.get_page(page_number)
 
     context = {
+        'user': user,
         'content_jobs': paginate_jobs(content_jobs_list, 'content_page'),
         'collab_jobs': paginate_jobs(collab_jobs_list, 'collab_page'),
         'hybrid_jobs': paginate_jobs(hybrid_jobs_list, 'hybrid_page'),
     }
 
     return render(request, 'dashboard.html', context)
-
 @login_required
 def job_list(request):
     """List all jobs with search and filtering"""

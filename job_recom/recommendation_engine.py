@@ -5,7 +5,6 @@ import pandas as pd
 from scipy.stats import pearsonr
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
 from django.contrib.auth.models import User
 from .models import Job, UserProfile, JobInteraction
 from datetime import date
@@ -14,9 +13,9 @@ from datetime import date
 class JobRecommendationEngine:
     """
     Job Recommendation Engine:
-    1. Content-based filtering (TF-IDF + cosine similarity)
-    2. Collaborative filtering (Pearson correlation)
-    3. Hybrid filtering (mean of content + collaborative scores)
+    1. Content-Based Filtering (TF-IDF + Cosine Similarity)
+    2. Collaborative Filtering (Pearson Correlation)
+    3. Hybrid Filtering (weighted combination of CB + CF)
     """
 
     def __init__(self):
@@ -25,9 +24,9 @@ class JobRecommendationEngine:
         self.job_ids = None
         self.user_job_ratings = None
 
+    # -------------------- Utilities --------------------
     @staticmethod
     def deactivate_expired_jobs():
-        """Mark jobs as inactive if their deadline has passed."""
         today = date.today()
         expired_jobs = Job.objects.filter(deadline__lt=today, is_active=True)
         count = expired_jobs.update(is_active=False)
@@ -46,6 +45,7 @@ class JobRecommendationEngine:
             return self.preprocess_text(' '.join(skills))
         return ""
 
+    # -------------------- Content-Based --------------------
     def build_content_features(self):
         self.deactivate_expired_jobs()
         jobs = Job.objects.filter(is_active=True)
@@ -68,7 +68,6 @@ class JobRecommendationEngine:
             self.build_content_features()
         return self.tfidf_vectorizer.transform([text])
 
-    # ======================== Content-Based Filtering ========================
     def content_based_recommendations(self, user_id, num_recommendations=10):
         self.deactivate_expired_jobs()
         try:
@@ -76,7 +75,6 @@ class JobRecommendationEngine:
         except UserProfile.DoesNotExist:
             return []
 
-        # Handle users with no skills
         if not user_profile.skills or user_profile.skills.strip() == "":
             return []
 
@@ -97,9 +95,8 @@ class JobRecommendationEngine:
         recommendations.sort(key=lambda x: x['similarity_score'], reverse=True)
         return recommendations[:num_recommendations]
 
-    # ======================== Collaborative Filtering ========================
+    # -------------------- Collaborative Filtering --------------------
     def build_user_item_matrix(self):
-        # Only use rating interactions
         interactions = JobInteraction.objects.filter(
             rating__isnull=False,
             interaction_type='rating'
@@ -110,19 +107,15 @@ class JobRecommendationEngine:
             return None
 
         df = pd.DataFrame(interactions)
-
-        # Handle multiple ratings: keep latest
-        df = df.sort_values('user_id')  # Optional: if timestamp exists, sort by it
+        df = df.sort_values('user_id')
         df = df.drop_duplicates(subset=['user_id', 'job_id'], keep='last')
 
-        # Pivot table
         self.user_job_ratings = df.pivot_table(
             index='user_id',
             columns='job_id',
             values='rating',
             fill_value=0
         )
-
         return self.user_job_ratings
 
     def calculate_user_similarity(self, user_id, other_user_id):
@@ -134,11 +127,18 @@ class JobRecommendationEngine:
         user1 = self.user_job_ratings.loc[user_id]
         user2 = self.user_job_ratings.loc[other_user_id]
         common = (user1 != 0) & (user2 != 0)
-        if common.sum() < 2:
+
+        if common.sum() < 1:
+            return 0
+
+        u1 = user1[common].values
+        u2 = user2[common].values
+
+        if np.std(u1) == 0 or np.std(u2) == 0:
             return 0
 
         try:
-            corr, _ = pearsonr(user1[common], user2[common])
+            corr, _ = pearsonr(u1, u2)
             return corr if not np.isnan(corr) else 0
         except Exception:
             return 0
@@ -146,21 +146,28 @@ class JobRecommendationEngine:
     def collaborative_filtering_recommendations(self, user_id, num_recommendations=10):
         self.deactivate_expired_jobs()
         self.build_user_item_matrix()
+
         if self.user_job_ratings is None or user_id not in self.user_job_ratings.index:
-            return []
-
-        user_sims = {other: self.calculate_user_similarity(user_id, other)
-                     for other in self.user_job_ratings.index if other != user_id}
-        user_sims = {k: v for k, v in user_sims.items() if v > 0}
-
-        if not user_sims:
             return []
 
         target_ratings = self.user_job_ratings.loc[user_id]
         unrated_jobs = target_ratings[target_ratings == 0].index
 
-        scores, sim_sums = defaultdict(float), defaultdict(float)
+        if len(unrated_jobs) == 0:
+            return []
 
+        user_sims = {}
+        for other_id in self.user_job_ratings.index:
+            if other_id == user_id:
+                continue
+            sim = self.calculate_user_similarity(user_id, other_id)
+            if sim > 0:
+                user_sims[other_id] = sim
+
+        if not user_sims:
+            return []
+
+        scores, sim_sums = defaultdict(float), defaultdict(float)
         for other_id, sim in user_sims.items():
             other_ratings = self.user_job_ratings.loc[other_id]
             for job_id in unrated_jobs:
@@ -169,38 +176,37 @@ class JobRecommendationEngine:
                     sim_sums[job_id] += abs(sim)
 
         recommendations = [
-            {'job_id': jid, 'predicted_rating': scores[jid] / sim_sums[jid], 'recommendation_type': 'collaborative'}
+            {'job_id': jid, 'predicted_rating': scores[jid]/sim_sums[jid], 'recommendation_type':'collaborative'}
             for jid in scores if sim_sums[jid] > 0
         ]
 
         recommendations.sort(key=lambda x: x['predicted_rating'], reverse=True)
         return recommendations[:num_recommendations]
 
-    # ======================== Hybrid Recommendations (Mean Score) ========================
+    # -------------------- Hybrid --------------------
     def hybrid_recommendations(self, user_id, num_recommendations=5):
         self.deactivate_expired_jobs()
         self.build_user_item_matrix()
         if self.job_features_matrix is None:
             self.build_content_features()
 
-        content = self.content_based_recommendations(user_id, num_recommendations * 2)
-        collab = self.collaborative_filtering_recommendations(user_id, num_recommendations * 2)
+        cf_recs = self.collaborative_filtering_recommendations(user_id, num_recommendations*2)
+        cb_recs = self.content_based_recommendations(user_id, num_recommendations*2)
 
-        # If both are empty, return empty
-        if not content and not collab:
-            return []
+        cf_dict = {r['job_id']: r.get('predicted_rating', 0) for r in cf_recs}
+        cb_dict = {r['job_id']: r.get('similarity_score', 0) for r in cb_recs}
 
-        content_dict = {r['job_id']: r['similarity_score'] for r in content}
-        collab_dict = {r['job_id']: r['predicted_rating'] for r in collab}
-
-        all_job_ids = set(content_dict.keys()).union(set(collab_dict.keys()))
+        all_jobs = set(cf_dict.keys()).union(set(cb_dict.keys()))
         hybrid = []
 
-        for job_id in all_job_ids:
-            content_score = content_dict.get(job_id, 0)
-            collab_score = collab_dict.get(job_id, 0)
-            mean_score = (content_score + collab_score) / 2
-            hybrid.append((job_id, {'hybrid_score': mean_score}))
+        for jid in all_jobs:
+            cf_score = cf_dict.get(jid, 0)
+            cb_score = cb_dict.get(jid, 0)
+
+            # Always take the mean
+            hybrid_score = (cf_score + cb_score) / 2
+
+            hybrid.append((jid, {'hybrid_score': hybrid_score}))
 
         hybrid.sort(key=lambda x: x[1]['hybrid_score'], reverse=True)
         return hybrid[:num_recommendations]
