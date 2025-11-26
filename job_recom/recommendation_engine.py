@@ -185,28 +185,43 @@ class JobRecommendationEngine:
 
     # -------------------- Hybrid --------------------
     def hybrid_recommendations(self, user_id, num_recommendations=5):
+        """
+        Hybrid recommendation combining Content-Based and Collaborative Filtering
+        - Only returns active jobs
+        - Handles empty CF or CB gracefully
+        """
         self.deactivate_expired_jobs()
-        self.build_user_item_matrix()
+
+        # Ensure features are built
         if self.job_features_matrix is None:
             self.build_content_features()
+        self.build_user_item_matrix()
 
+        # Get CF and CB recommendations
         cf_recs = self.collaborative_filtering_recommendations(user_id, num_recommendations*2)
         cb_recs = self.content_based_recommendations(user_id, num_recommendations*2)
 
-        cf_dict = {r['job_id']: r.get('predicted_rating', 0) for r in cf_recs}
-        cb_dict = {r['job_id']: r.get('similarity_score', 0) for r in cb_recs}
+        # Convert to dicts
+        cf_dict = {r['job_id']: r.get('predicted_rating', 0) for r in cf_recs} if cf_recs else {}
+        cb_dict = {r['job_id']: r.get('similarity_score', 0) for r in cb_recs} if cb_recs else {}
 
-        all_jobs = set(cf_dict.keys()).union(set(cb_dict.keys()))
+        all_job_ids = set(cf_dict.keys()).union(set(cb_dict.keys()))
+
+        # Keep only active jobs
+        active_job_ids = set(Job.objects.filter(id__in=all_job_ids, is_active=True).values_list('id', flat=True))
+
         hybrid = []
-
-        for jid in all_jobs:
+        for jid in active_job_ids:
             cf_score = cf_dict.get(jid, 0)
             cb_score = cb_dict.get(jid, 0)
-
-            # Always take the mean
             hybrid_score = (cf_score + cb_score) / 2
+            hybrid.append((jid, {
+                'hybrid_score': hybrid_score,
+                'cf_score': cf_score,
+                'cb_score': cb_score
+            }))
 
-            hybrid.append((jid, {'hybrid_score': hybrid_score}))
-
+        # Sort descending by hybrid score
         hybrid.sort(key=lambda x: x[1]['hybrid_score'], reverse=True)
+
         return hybrid[:num_recommendations]

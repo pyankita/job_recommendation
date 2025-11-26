@@ -5,135 +5,80 @@
 
 {% block content %}
 <style>
-    .saved-jobs-container {
-        max-width: 900px;
-        margin: 40px auto 60px auto;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .saved-job {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border: 1px solid #ddd;
-        padding: 16px 20px;
-        border-radius: 8px;
-        background-color: #fff;
-        box-shadow: 0 2px 8px rgb(0 0 0 / 0.05);
-        transition: box-shadow 0.3s ease, transform 0.2s ease;
-    }
-
-    .saved-job:hover {
-        box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-        transform: translateY(-2px);
-    }
-
-    .saved-job-info {
-        flex: 1;
-        margin-right: 20px;
-    }
-
-    .job-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #1e40af; /* blue-800 */
-        cursor: pointer;
-        text-decoration: underline;
-    }
-
-    .job-company {
-        color: #444;
-        font-weight: 500;
-        margin: 4px 0;
-    }
-
-    .job-desc {
-        color: #555;
-        font-size: 0.9rem;
-        max-height: 48px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin-bottom: 6px;
-    }
-
-    .job-salary {
-        color: #2563eb; /* blue-600 */
-        font-weight: 600;
-        margin-bottom: 6px;
-    }
-
-    .job-actions {
-        display: flex;
-        gap: 10px;
-    }
-
-    .action-btn {
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        border: none;
-        text-align: center;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    .action-btn:hover {
-        transform: translateY(-1px);
-    }
-
-    .detail-btn {
-        background-color: #2563eb; /* blue-600 */
-        color: white;
-        text-decoration: none;
-    }
-
-    .detail-btn:hover {
-        background-color: #1d4ed8; /* blue-800 */
-    }
-
-    .remove-btn {
-        background-color: #ef4444; /* red-500 */
-        color: white;
-    }
-
-    .remove-btn:hover {
-        background-color: #b91c1c; /* red-700 */
-    }
-
-    .no-jobs {
-        text-align: center;
-        color: #888;
-        font-size: 1.2rem;
-        margin-top: 40px;
-    }
+/* Your existing styles remain unchanged */
+.saved-jobs-container { max-width: 900px; margin: 40px auto 60px auto; display: flex; flex-direction: column; gap: 20px; }
+.saved-job { display: flex; justify-content: space-between; align-items: center; border: 1px solid #ddd; padding: 16px 20px; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 8px rgb(0 0 0 / 0.05); transition: box-shadow 0.3s ease, transform 0.2s ease; cursor: pointer; }
+.saved-job:hover { box-shadow: 0 4px 12px rgb(0 0 0 / 0.1); transform: translateY(-2px); }
+.saved-job-info { flex: 1; margin-right: 20px; }
+.job-title { font-size: 1.25rem; font-weight: 600; color: #1e40af; text-decoration: underline; }
+.job-company { color: #444; font-weight: 500; margin: 4px 0; }
+.job-desc { color: #555; font-size: 0.9rem; max-height: 48px; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
+.job-salary { color: #2563eb; font-weight: 600; margin-bottom: 6px; }
+.job-actions { display: flex; gap: 10px; }
+.action-btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; text-align: center; transition: background-color 0.3s ease, transform 0.2s ease; }
+.detail-btn { background-color: #2563eb; color: white; text-decoration: none; }
+.detail-btn:hover { background-color: #1d4ed8; }
+.remove-btn { background-color: #ef4444; color: white; }
+.remove-btn:hover { background-color: #b91c1c; }
+.no-jobs { text-align: center; color: #888; font-size: 1.2rem; margin-top: 40px; }
 </style>
 
 <div class="saved-jobs-container">
     {% if saved_interactions %}
         {% for interaction in saved_interactions %}
-            <div class="saved-job">
-                <div class="saved-job-info">
-                    <a href="{% url 'job_detail' interaction.job.id %}" class="job-title">{{ interaction.job.title }}</a>
+            <div class="saved-job" data-job-id="{{ interaction.job.id }}">
+                <div class="saved-job-info" onclick="window.location.href='{% url 'job_detail' interaction.job.id %}'">
+                    <div class="job-title">{{ interaction.job.title }}</div>
                     <div class="job-company">{{ interaction.job.company.name }}</div>
                     <div class="job-desc">{{ interaction.job.description|truncatechars:100 }}</div>
                     <div class="job-salary">{{ interaction.job.salary_range }}</div>
                 </div>
-
                 <div class="job-actions">
-                    <a href="{% url 'job_detail' interaction.job.id %}" class="action-btn detail-btn">Detail</a>
-                    <form method="post" action="{% url 'save_job' interaction.job.id %}" class="remove-form">
-                        {% csrf_token %}
-                        <button type="submit" class="action-btn remove-btn" title="Remove this job">Remove</button>
-                    </form>
+                    <button class="action-btn remove-btn" onclick="removeSavedJob(event, {{ interaction.job.id }})">Remove</button>
                 </div>
             </div>
         {% endfor %}
     {% else %}
-        <div class="no-jobs">
-            You have no saved jobs yet.
-        </div>
+        <div class="no-jobs">You have no saved jobs yet.</div>
     {% endif %}
 </div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i=0; i<cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length +1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length +1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function removeSavedJob(event, jobId) {
+    event.stopPropagation(); // prevent card click
+    const csrftoken = getCookie('csrftoken');
+
+    fetch("{% url 'save_job_ajax' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({ job_id: jobId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'unsaved') {
+            const jobCard = document.querySelector(`.saved-job[data-job-id='${jobId}']`);
+            if (jobCard) jobCard.remove();
+        }
+    })
+    .catch(err => console.error(err));
+}
+</script>
 {% endblock %}
